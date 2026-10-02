@@ -89,7 +89,7 @@ function HistoryPage({ onBottle, bottles }: { onBottle: (bottle: Bottle) => void
             <div className="empty-meta">
               <strong>{bottle.name}</strong>
               <span>{bottle.finishedAt}</span>
-              {bottle.rating && <span>★ {bottle.rating.toFixed(1)}</span>}
+              {bottle.rating !== undefined && <span>★ {bottle.rating.toFixed(1)}</span>}
             </div>
           </div>
         ))}
@@ -161,7 +161,7 @@ function DetailPage({ bottle, onBack, onUpdate }: { bottle: Bottle; onBack: () =
           <div><span>용량</span><strong>{bottle.volumeMl} ml</strong></div>
           <div><span>도수</span><strong>{bottle.abv}%</strong></div>
           <div><span>예시 구매 가격</span><strong>₩{bottle.price.toLocaleString()}</strong></div>
-          <div><span>내 평점</span><strong>{bottle.rating ? "★ " + bottle.rating : "—"}</strong></div>
+          <div><span>내 평점</span><strong>{bottle.rating !== undefined ? "★ " + bottle.rating : "—"}</strong></div>
         </div>
       </section>
       <section className="detail-section">

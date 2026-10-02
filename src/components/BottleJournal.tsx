@@ -7,6 +7,7 @@ export function BottleJournal({ bottle, onUpdate }: { bottle: Bottle; onUpdate: 
   const [message, setMessage] = useState("");
   const [confirmFinish, setConfirmFinish] = useState(false);
   function changeStatus() {
+    setMessage("");
     const today = new Date();
     const finishedAt = [today.getFullYear(), String(today.getMonth() + 1).padStart(2, "0"), String(today.getDate()).padStart(2, "0")].join(".");
     const finished = bottle.status === "owned";
@@ -20,6 +21,7 @@ export function BottleJournal({ bottle, onUpdate }: { bottle: Bottle; onUpdate: 
     <h2>나의 시음 기록</h2>
     <form className="confirm-form" onSubmit={e => {
       e.preventDefault();
+      setMessage("");
       if (onUpdate({ ...bottle, rating: rating === "" ? undefined : Number(rating), tastingNote: note.trim() })) setMessage("평점과 메모를 저장했어요.");
     }}>
       <label>내 평점 (0~5)<input type="number" min="0" max="5" step="0.1" value={rating} onChange={e => { setRating(e.target.value); setMessage(""); }} placeholder="아직 평가하지 않았어요" /></label>
