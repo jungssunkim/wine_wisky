@@ -35,3 +35,12 @@ npm run dev
 3. 보유/완병 상태 구분
 4. 사진 등록 UX
 5. 이후 실제 검색/AI/DB 연동
+
+## Mobile prototype validation
+
+- Run `npm install`, then `npm run dev -- --host 0.0.0.0`.
+- In another terminal, run `npx playwright install chromium` and `npm run test:mobile`.
+- The browser check covers 360, 390, 412 and 430px: all five screens, search/category filtering, detail return navigation, empty pairing input, camera candidate confirmation, and adding a seventh bottle on a new shelf. It also checks horizontal overflow, nested buttons, runtime errors and minimum button dimensions.
+- `npm run build` validates TypeScript and production assets.
+
+The camera flow and pairing results use bundled demo data. Added bottles are held in memory and reset on reload. Real photo recognition, source lookup, persistence and AI pairing remain future work.
