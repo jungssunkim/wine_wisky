@@ -60,3 +60,13 @@ Photo capture uses the device file picker with a rear-camera hint; the exact pic
 Real photo recognition/OCR remains a demo. Uploaded photos are not sent for identification. Manually entered pairing foods power the existing matching logic.
 
 Run `npm run test:manual` with the dev server running to verify registration, photo processing, editing/cancel, invalid uploads, storage errors, reload persistence, history and pairing at all four mobile widths. Actions runs all three browser suites.
+
+## Backup and restore
+
+Open **백업·복원** next to the cabinet's local-save notice. **백업 파일 저장** downloads a versioned JSON file containing photos, product information, ratings, tasting notes and finished status. Keep this file outside the browser before clearing site data or switching devices; this is not automatic cloud sync.
+
+Import first validates and previews a file. The default mode adds new bottle IDs and preserves current records for matching IDs. Reimporting the same backup does not duplicate bottles. Replacement restores exactly the file contents, including an empty collection, and requires explicit confirmation. The app supports up to 1,000 bottles and 10MB backup files; actual browser storage may fill sooner.
+
+Malformed/unsupported files, invalid records, duplicate IDs and external image URLs are rejected before writes. A failed storage write leaves the original collection unchanged. If stored data is unreadable, export its exact original text or recover from a valid backup using confirmed replacement. The unreadable original is copied to `wine-wisky:recovery:v1` before recovery; if that copy or replacement fails, the original remains intact. Writes also refuse to overwrite data changed by another tab: reload before retrying.
+
+With the dev server running, `npm run test:backup` verifies downloads, photo/journal roundtrips, merge deduplication, replace confirmation/cancel, empty restores, invalid inputs, quota failures, recovery and stale-write protection at all four mobile widths.

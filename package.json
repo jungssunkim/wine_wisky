@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "test:mobile": "node qa/mobile-check.cjs",
     "test:persistence": "node qa/persistence-check.cjs",
-    "test:manual": "node qa/manual-entry-check.cjs"
+    "test:manual": "node qa/manual-entry-check.cjs",
+    "test:backup": "node qa/backup-check.cjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^4.3.4",

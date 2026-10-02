@@ -1,60 +1,61 @@
 import { useState } from "react";
 import { bottles as initialBottles } from "../data/mockBottles";
-import { categories } from "../data/categories";
-import { isLocalPhoto } from "../lib/bottlePhoto";
+import { isBottle, mergeBottles, MAX_BACKUP_BOTTLES } from "../lib/cabinetData";
 import type { Bottle } from "../types";
 
 export const STORAGE_KEY = "wine-wisky:cabinet:v1";
-type Snapshot = { bottles: Bottle[]; error: string; blocked: boolean };
-
-function isBottle(value: unknown): value is Bottle {
-  if (!value || typeof value !== "object") return false;
-  const b = value as Record<string, unknown>;
-  return ["id", "name", "shortName", "brand", "country", "note"].every(key => typeof b[key] === "string")
-    && typeof b.id === "string" && b.id.length > 0
-    && categories.some(c => c.value === b.category)
-    && ["owned", "finished"].includes(String(b.status))
-    && ["classic", "wine", "sake", "short", "tall"].includes(String(b.shape))
-    && ["amber", "ruby", "clear", "green", "dark"].includes(String(b.tone))
-    && ["abv", "volumeMl", "price"].every(key => typeof b[key] === "number" && Number.isFinite(b[key]) && (b[key] as number) >= 0)
-    && Array.isArray(b.pairings) && b.pairings.every(p => typeof p === "string")
-    && (b.rating === undefined || (typeof b.rating === "number" && Number.isFinite(b.rating) && b.rating >= 0 && b.rating <= 5))
-    && (b.bottleImageUrl === undefined || isLocalPhoto(b.bottleImageUrl))
-    && (b.priceIsUnknown === undefined || typeof b.priceIsUnknown === "boolean")
-    && (b.entrySource === undefined || b.entrySource === "manual" || b.entrySource === "demo")
-    && ["region", "finishedAt", "tastingNote"].every(key => b[key] === undefined || typeof b[key] === "string");
-}
+export const RECOVERY_KEY = "wine-wisky:recovery:v1";
+type Snapshot = { bottles: Bottle[]; error: string; blocked: boolean; raw: string | null | undefined };
 
 function readCabinet(): Snapshot {
+  let raw: string | null | undefined;
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw === null) return { bottles: initialBottles, error: "", blocked: false };
+    raw = localStorage.getItem(STORAGE_KEY);
+    if (raw === null) return { bottles: initialBottles, error: "", blocked: false, raw };
     const parsed = JSON.parse(raw);
     if (parsed?.version !== 1 || !Array.isArray(parsed.bottles) || !parsed.bottles.every(isBottle)
       || new Set(parsed.bottles.map((b: Bottle) => b.id)).size !== parsed.bottles.length) throw new Error("Invalid cabinet");
-    return { bottles: parsed.bottles, error: "", blocked: false };
+    return { bottles: parsed.bottles, error: "", blocked: false, raw };
   } catch {
-    return { bottles: initialBottles, error: "저장된 술장을 읽을 수 없어 예시 술장을 표시합니다. 기존 데이터 보호를 위해 변경은 저장하지 않습니다.", blocked: true };
+    return { bottles: initialBottles, error: "저장된 술장을 읽을 수 없어 예시 술장을 표시합니다. 일반 변경은 저장하지 않습니다. 백업·복원에서 원본을 보관하거나 정상 백업으로 복구할 수 있어요.", blocked: true, raw };
   }
 }
 
 export function useCabinet() {
   const [snapshot, setSnapshot] = useState(readCabinet);
-  function commit(next: Bottle[]): boolean {
-    if (snapshot.blocked) return false;
+  function commit(next: Bottle[], recover = false): boolean {
+    if (snapshot.blocked && !recover) return false;
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 1, bottles: next }));
-      setSnapshot({ bottles: next, error: "", blocked: false });
+      // Refuse stale writes from another tab instead of silently overwriting them.
+      if (snapshot.raw === undefined || localStorage.getItem(STORAGE_KEY) !== snapshot.raw) {
+        setSnapshot(current => ({ ...current, error: "다른 탭에서 술장이 변경됐거나 저장소를 읽을 수 없어요. 새로고침 후 다시 시도해 주세요." }));
+        return false;
+      }
+      if (next.length > MAX_BACKUP_BOTTLES) {
+        setSnapshot(current => ({ ...current, error: "술장은 최대 1,000병까지 저장할 수 있어요." }));
+        return false;
+      }
+      const raw = JSON.stringify({ version: 1, bottles: next });
+      // Before replacing unreadable data, retain its exact bytes in a recovery slot.
+      if (snapshot.blocked && snapshot.raw !== null) localStorage.setItem(RECOVERY_KEY, snapshot.raw);
+      localStorage.setItem(STORAGE_KEY, raw);
+      setSnapshot({ bottles: next, error: "", blocked: false, raw });
       return true;
     } catch {
-      setSnapshot(current => ({ ...current, error: "저장 공간이 부족하거나 브라우저 저장이 차단되어 변경하지 못했어요. 저장 설정을 확인한 뒤 다시 시도해 주세요." }));
+      setSnapshot(current => ({ ...current, error: "저장 공간이 부족하거나 브라우저 저장이 차단되어 변경하지 못했어요. 기존 데이터는 유지됩니다." }));
       return false;
     }
   }
   return {
     bottles: snapshot.bottles,
     storageError: snapshot.error,
+    storageBlocked: snapshot.blocked,
+    originalData: snapshot.blocked ? snapshot.raw : undefined,
     addBottle: (bottle: Bottle) => commit([...snapshot.bottles, bottle]),
-    updateBottle: (bottle: Bottle) => commit(snapshot.bottles.map(b => b.id === bottle.id ? bottle : b))
+    updateBottle: (bottle: Bottle) => commit(snapshot.bottles.map(b => b.id === bottle.id ? bottle : b)),
+    restoreBottles: (incoming: Bottle[], mode: "merge" | "replace") => {
+      if (snapshot.blocked && mode !== "replace") return false;
+      return commit(mode === "merge" ? mergeBottles(snapshot.bottles, incoming) : incoming, mode === "replace");
+    }
   };
 }

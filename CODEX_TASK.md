@@ -49,4 +49,12 @@ Polish and validate the first mobile UI prototype for Wine & Whisky Cabinet.
 - Accept optional purchase prices without treating unknown prices as zero-cost purchases.
 - Preserve existing v1 saved collections and explicitly label manual vs demo information.
 - Validate build and mobile, persistence, and manual/photo browser suites in Actions.
-- Next: export/import for backup, then real identification with verified product sources.
+- Backup/restore is implemented below. Real identification with verified product sources remains a future step.
+
+## Follow-up: portable backups
+- Export photos, bottle data and journals in a versioned JSON backup.
+- Preview validated imports; default to merging new IDs while preserving existing records.
+- Require explicit confirmation for replacement, including empty backups.
+- Keep previous data intact on parse, quota and stale-tab failures.
+- Support recovery from unreadable storage while preserving its original text.
+- Validate build and all four mobile browser suites in Actions.
