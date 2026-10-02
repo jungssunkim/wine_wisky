@@ -101,6 +101,15 @@ const KEY = 'wine-wisky:cabinet:v1';
   await page.waitForFunction(()=>!!document.querySelector('.detail-bottle-stage .bottle'));
   assert.equal(await page.locator('.detail-bottle-stage img').count(),0);
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+  await page.evaluate(key=>{
+    const saved=JSON.parse(localStorage.getItem(key));
+    saved.bottles[0].name='A'.repeat(100);
+    saved.bottles[0].shortName='A'.repeat(100);
+    localStorage.setItem(key,JSON.stringify(saved));
+  },KEY);
+  await page.reload();
+  assert(await page.locator('.recommend-card h3').evaluate(e=>e.scrollWidth<=e.clientWidth));
+  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
   assert.deepEqual(errors,[]);
   console.log(width+'px: manual entry, photo resize/reload/removal/fallback, invalid uploads, editing/cancel, journal preservation and pairing PASS');
   await page.close();
