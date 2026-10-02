@@ -43,4 +43,10 @@ npm run dev
 - The browser check covers 360, 390, 412 and 430px: all five screens, search/category filtering, detail return navigation, empty pairing input, camera candidate confirmation, and adding a seventh bottle on a new shelf. It also checks horizontal overflow, nested buttons, runtime errors and minimum button dimensions.
 - `npm run build` validates TypeScript and production assets.
 
-The camera flow and pairing results use bundled demo data. Added bottles are held in memory and reset on reload. Real photo recognition, source lookup, persistence and AI pairing remain future work.
+The camera flow and pairing results use bundled demo data. Added bottles, tasting notes, ratings and finished/owned status are saved in this browser's localStorage. Data is not synced between devices; clearing browser site data removes it. Corrupt/unsupported saved data is preserved and a warning is shown. Failed writes leave the previous collection unchanged. Real photo recognition, source lookup, cloud sync and AI pairing remain future work.
+
+## Local collection and tasting journal
+
+Open a bottle to save a rating and tasting note. “다 마신 술로 기록” asks for confirmation, keeps the bottle in History, and removes it from owned-bottle pairing recommendations. “보유 술장으로 되돌리기” reverses that status without losing notes.
+
+With the dev server running, `npm run test:persistence` verifies reload persistence, finish/restore, rating/note edits, pairing exclusion, empty collections, malformed saved data and storage write failures at all four mobile widths. GitHub Actions runs both mobile suites after the production build.

@@ -33,3 +33,11 @@ Polish and validate the first mobile UI prototype for Wine & Whisky Cabinet.
 - Main flows are usable on a phone.
 - No obvious horizontal scrolling at 360px.
 - Summarize changes and remaining UX issues.
+
+## Follow-up: local collection (2026-10-02)
+- Browser-local persistence for added bottles, ratings and tasting notes.
+- Confirm finished status, retain empty bottles in History, and allow restoring owned status.
+- Keep pairing limited to owned bottles and support an empty collection.
+- Preserve unreadable stored data; report storage failures without false success.
+- Validate production build and both four-width mobile browser suites in Actions.
+- Real photo recognition, cloud sync and manual product entry remain future work.

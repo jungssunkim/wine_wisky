@@ -5,7 +5,8 @@ import {
   Camera, ChevronLeft, ChevronRight, GlassWater, History, Home,
   Search, Sparkles, UtensilsCrossed, Wine
 } from "lucide-react";
-import { bottles as initialBottles } from "./data/mockBottles";
+import { useCabinet } from "./hooks/useCabinet";
+import { BottleJournal } from "./components/BottleJournal";
 import type { Bottle } from "./types";
 
 type Tab = "cabinet" | "history" | "add" | "pairing";
@@ -35,6 +36,7 @@ function Cabinet({ onBottle, bottles }: { onBottle: (bottle: Bottle) => void; bo
   return (
     <main className="page">
       <Header title="나의 술장" eyebrow="PRIVATE COLLECTION" />
+      <p className="local-save-note">이 브라우저에 저장됩니다 · 기기 간 동기화 없음</p>
       <section className="collection-summary">
         <div><span>현재 보유</span><strong>{owned.length}병의 컬렉션</strong></div>
         <div className="summary-badge"><Sparkles size={16} /> 취향을 담은 선반</div>
@@ -55,7 +57,7 @@ function Cabinet({ onBottle, bottles }: { onBottle: (bottle: Bottle) => void; bo
           </div>
         ))}
       </section>
-      <section className="section-block">
+      {owned.length > 0 && <section className="section-block">
         <div className="section-title-row">
           <div><span className="eyebrow">QUICK PICK</span><h2>오늘 한 잔</h2></div>
           <button className="text-button" onClick={() => onBottle(owned[0])}>자세히 보기 <ChevronRight size={16} /></button>
@@ -63,12 +65,12 @@ function Cabinet({ onBottle, bottles }: { onBottle: (bottle: Bottle) => void; bo
         <div className="recommend-card">
           <div>
             <span className="recommend-kicker">Tonight's pick</span>
-            <h3>Balvenie 12</h3>
-            <p>달콤한 몰트와 은은한 오크. 천천히 마시기 좋은 밤.</p>
+            <h3>{owned[0].shortName}</h3>
+            <p>{owned[0].note}</p>
           </div>
           <GlassWater size={34} />
         </div>
-      </section>
+      </section>}
     </main>
   );
 }
@@ -79,6 +81,7 @@ function HistoryPage({ onBottle, bottles }: { onBottle: (bottle: Bottle) => void
     <main className="page">
       <Header title="비워낸 기록" eyebrow="TASTED & REMEMBERED" />
       <p className="intro-copy">다 마신 술도 사라지지 않아요. 당신의 취향이 쌓인 선반입니다.</p>
+      {!finished.length && <p className="empty-state">아직 비워낸 병이 없어요.<br />술 상세에서 다 마신 술을 기록해 보세요.</p>}
       <section className="empty-grid">
         {finished.map((bottle) => (
           <div className="empty-card" key={bottle.id}>
@@ -136,7 +139,7 @@ function PairingPage({ onBottle, bottles }: { onBottle: (bottle: Bottle) => void
   );
 }
 
-function DetailPage({ bottle, onBack }: { bottle: Bottle; onBack: () => void }) {
+function DetailPage({ bottle, onBack, onUpdate }: { bottle: Bottle; onBack: () => void; onUpdate: (bottle: Bottle) => boolean }) {
   return (
     <main className="page detail-page">
       <Header title="한 병의 이야기" eyebrow={bottle.category.toUpperCase()} onBack={onBack} />
@@ -165,6 +168,7 @@ function DetailPage({ bottle, onBack }: { bottle: Bottle; onBack: () => void }) 
         <span className="eyebrow">PAIRING</span>
         <div className="chip-row">{bottle.pairings.map((p) => <span className="chip" key={p}>{p}</span>)}</div>
       </section>
+      <BottleJournal key={bottle.id} bottle={bottle} onUpdate={onUpdate} />
       <section className="detail-section source-preview">
         <span className="eyebrow">SOURCE PREVIEW</span>
         <p>실제 제품 식별 기능에서는 공식 홈페이지, 판매처, 검색 출처 링크가 여기에 표시됩니다.</p>
@@ -185,7 +189,7 @@ function BottomNav({ active, onChange }: { active: Tab; onChange: (tab: Tab) => 
 }
 
 export default function App() {
-  const [bottles, setBottles] = useState(initialBottles);
+  const { bottles, storageError, addBottle, updateBottle } = useCabinet();
   const [screen, setScreen] = useState<Screen>({ type: "tab", tab: "cabinet" });
   const activeTab = screen.type === "tab" ? screen.tab : screen.from;
   const openBottle = (bottle: Bottle) => setScreen({ type: "detail", bottle, from: activeTab });
@@ -193,13 +197,14 @@ export default function App() {
   return (
     <div className="app-shell">
       <div className="ambient ambient-one" /><div className="ambient ambient-two" />
+      {storageError && <p className="storage-alert" role="alert">{storageError}</p>}
       {screen.type === "detail" ? (
-        <DetailPage bottle={screen.bottle} onBack={() => setScreen({ type: "tab", tab: screen.from })} />
+        <DetailPage bottle={bottles.find(b => b.id === screen.bottle.id) ?? screen.bottle} onUpdate={updateBottle} onBack={() => setScreen({ type: "tab", tab: screen.from })} />
       ) : (
         <>
           {screen.tab === "cabinet" && <Cabinet bottles={bottles} onBottle={openBottle} />}
           {screen.tab === "history" && <HistoryPage bottles={bottles} onBottle={openBottle} />}
-          {screen.tab === "add" && <AddPage onSave={bottle => { setBottles(current => [...current, bottle]); setScreen({type: "tab", tab: "cabinet"}); }} />}
+          {screen.tab === "add" && <AddPage onSave={bottle => { if (addBottle(bottle)) setScreen({type: "tab", tab: "cabinet"}); }} />}
           {screen.tab === "pairing" && <PairingPage bottles={bottles} onBottle={openBottle} />}
           <BottomNav active={activeTab} onChange={(tab) => setScreen({ type: "tab", tab })} />
         </>

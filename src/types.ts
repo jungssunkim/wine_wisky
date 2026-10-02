@@ -27,4 +27,5 @@ export interface Bottle {
   tone: "amber" | "ruby" | "clear" | "green" | "dark";
   rating?: number;
   finishedAt?: string;
+  tastingNote?: string;
 }
