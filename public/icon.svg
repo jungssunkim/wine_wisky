@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#17120f"/>
+  <rect x="205" y="74" width="102" height="74" rx="16" fill="#c89557"/>
+  <path d="M180 142h152v50c0 31 35 43 35 85v133c0 25-20 45-45 45H190c-25 0-45-20-45-45V277c0-42 35-54 35-85v-50Z" fill="#7b431e" stroke="#e1b375" stroke-width="12"/>
+  <rect x="180" y="247" width="152" height="108" rx="10" fill="#ead9b6"/>
+  <text x="256" y="294" text-anchor="middle" font-size="26" font-family="serif" fill="#2b1b12">MY</text>
+  <text x="256" y="326" text-anchor="middle" font-size="28" font-family="serif" font-weight="700" fill="#2b1b12">CABINET</text>
+</svg>
