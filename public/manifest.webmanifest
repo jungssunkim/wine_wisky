@@ -1,0 +1,17 @@
+{
+  "name": "Wine & Whisky Cabinet",
+  "short_name": "My Cabinet",
+  "description": "내 술을 실제 술장처럼 보관하고 기록하는 개인 디지털 캐비닛",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0d0b0a",
+  "theme_color": "#17120f",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
