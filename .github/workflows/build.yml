@@ -39,6 +39,7 @@ jobs:
           done
           npm run test:mobile
           npm run test:persistence
+          npm run test:manual
 
       - name: Upload web build
         uses: actions/upload-artifact@v4

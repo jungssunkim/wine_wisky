@@ -1,3 +1,5 @@
+import { BottleEditor } from "./components/BottleEditor";
+import { categories } from "./data/categories";
 import { BottleFigure } from "./components/BottleFigure";
 import { AddPage } from "./pages/AddPage";
 import { useMemo, useState } from "react";
@@ -42,7 +44,7 @@ function Cabinet({ onBottle, bottles }: { onBottle: (bottle: Bottle) => void; bo
         <div className="summary-badge"><Sparkles size={16} /> 취향을 담은 선반</div>
       </section>
       <label className="cabinet-search"><Search size={18} /><input aria-label="술 검색" placeholder="술 이름, 브랜드, 원산지 검색" value={query} onChange={e => setQuery(e.target.value)} /></label>
-      <div className="filter-row" aria-label="술 종류">{[["all", "전체"], ["whisky", "위스키"], ["wine", "와인"], ["sake", "사케"], ["baijiu", "바이주"]].map(([value, label]) => <button key={value} aria-pressed={category === value} onClick={() => setCategory(value)}>{label}</button>)}</div>
+      <div className="filter-row" aria-label="술 종류">{[{value: "all", label: "전체"}, ...categories.filter(c => owned.some(b => b.category === c.value))].map(({value, label}) => <button key={value} aria-pressed={category === value} onClick={() => setCategory(value)}>{label}</button>)}</div>
       <section className="cabinet-shell" aria-label="보유 술 선반">
         {!filtered.length && <p className="empty-state">조건에 맞는 술이 없어요.<br />다른 이름이나 종류로 찾아보세요.</p>}
         <div className="cabinet-top-glow" />
@@ -121,7 +123,7 @@ function PairingPage({ onBottle, bottles }: { onBottle: (bottle: Bottle) => void
       </section>
       <section className="pairing-results">
         <span className="eyebrow">내가 가진 술에서 추천</span>
-        <p className="intro-copy pairing-status" role="status">{!submitted ? "음식 이름을 입력해 주세요." : suggestions.length ? `${submitted}에 어울리는 ${suggestions.length}병 · 데모 데이터 기준` : `“${submitted}”에 맞는 보유 술이 없어요. 삼겹살, 회, 치즈로 시도해 보세요.`}</p>
+        <p className="intro-copy pairing-status" role="status">{!submitted ? "음식 이름을 입력해 주세요." : suggestions.length ? `${submitted}에 어울리는 ${suggestions.length}병 · 등록한 페어링 음식 기준` : `“${submitted}”에 맞는 보유 술이 없어요. 삼겹살, 회, 치즈로 시도해 보세요.`}</p>
         {suggestions.map((bottle, index) => (
           <button className="pairing-card" key={bottle.id} onClick={() => onBottle(bottle)}>
             <span className="rank">0{index + 1}</span>
@@ -140,9 +142,12 @@ function PairingPage({ onBottle, bottles }: { onBottle: (bottle: Bottle) => void
 }
 
 function DetailPage({ bottle, onBack, onUpdate }: { bottle: Bottle; onBack: () => void; onUpdate: (bottle: Bottle) => boolean }) {
+  const [editing, setEditing] = useState(false);
+  if (editing) return <main className="page"><Header title="술 정보 수정" eyebrow="EDIT BOTTLE" onBack={() => setEditing(false)} /><BottleEditor initial={bottle} onCancel={() => setEditing(false)} onSave={updated => { const saved = onUpdate(updated); if (saved) setEditing(false); return saved; }} /></main>;
   return (
     <main className="page detail-page">
       <Header title="한 병의 이야기" eyebrow={bottle.category.toUpperCase()} onBack={onBack} />
+      <button className="text-button edit-bottle-button" onClick={() => setEditing(true)}>술 정보 수정</button>
       <section className="detail-hero">
         <div className="detail-bottle-stage"><BottleFigure bottle={bottle} empty={bottle.status === "finished"} /></div>
         <div className="detail-headline">
@@ -150,7 +155,7 @@ function DetailPage({ bottle, onBack, onUpdate }: { bottle: Bottle; onBack: () =
           <p className="bottle-status">{bottle.status === "finished" ? `완병 · ${bottle.finishedAt}` : "보유 중"}</p>
           <h2>{bottle.name}</h2>
           <div className="detail-tags">
-            <span>{bottle.country}</span><span>{bottle.region ?? bottle.category}</span><span>{bottle.abv}%</span>
+            <span>{bottle.country || "원산지 미입력"}</span><span>{bottle.region ?? bottle.category}</span><span>{bottle.abv}%</span>
           </div>
         </div>
       </section>
@@ -160,7 +165,7 @@ function DetailPage({ bottle, onBack, onUpdate }: { bottle: Bottle; onBack: () =
         <div className="stat-grid">
           <div><span>용량</span><strong>{bottle.volumeMl} ml</strong></div>
           <div><span>도수</span><strong>{bottle.abv}%</strong></div>
-          <div><span>예시 구매 가격</span><strong>₩{bottle.price.toLocaleString()}</strong></div>
+          <div><span>{bottle.entrySource === "manual" ? "구매 가격" : "예시 구매 가격"}</span><strong>{bottle.priceIsUnknown ? "미입력" : "₩" + bottle.price.toLocaleString()}</strong></div>
           <div><span>내 평점</span><strong>{bottle.rating !== undefined ? "★ " + bottle.rating : "—"}</strong></div>
         </div>
       </section>
@@ -171,7 +176,7 @@ function DetailPage({ bottle, onBack, onUpdate }: { bottle: Bottle; onBack: () =
       <BottleJournal key={bottle.id} bottle={bottle} onUpdate={onUpdate} />
       <section className="detail-section source-preview">
         <span className="eyebrow">SOURCE PREVIEW</span>
-        <p>실제 제품 식별 기능에서는 공식 홈페이지, 판매처, 검색 출처 링크가 여기에 표시됩니다.</p>
+        <p>{bottle.entrySource === "manual" ? "직접 등록·수정한 정보입니다. 사진 자동 인식이나 웹 검색 결과가 아닙니다." : "앱에 포함된 예시 제품 정보입니다. 실제 제품 식별 기능에서는 공식 홈페이지와 참고 출처를 표시할 예정입니다."}</p>
       </section>
     </main>
   );
@@ -204,7 +209,7 @@ export default function App() {
         <>
           {screen.tab === "cabinet" && <Cabinet bottles={bottles} onBottle={openBottle} />}
           {screen.tab === "history" && <HistoryPage bottles={bottles} onBottle={openBottle} />}
-          {screen.tab === "add" && <AddPage onSave={bottle => { if (addBottle(bottle)) setScreen({type: "tab", tab: "cabinet"}); }} />}
+          {screen.tab === "add" && <AddPage onSave={bottle => { const saved = addBottle(bottle); if (saved) setScreen({type: "tab", tab: "cabinet"}); return saved; }} />}
           {screen.tab === "pairing" && <PairingPage bottles={bottles} onBottle={openBottle} />}
           <BottomNav active={activeTab} onChange={(tab) => setScreen({ type: "tab", tab })} />
         </>

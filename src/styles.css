@@ -218,3 +218,24 @@ button { cursor: pointer; touch-action: manipulation; }
 .status-actions button { width: 100%; }
 .finish-confirm { display: grid; gap: 12px; }
 .finish-confirm p, .journal-message { color: #d7b68e; font-size: 13px; line-height: 1.7; }
+
+/* User photos remain bottle-sized; silhouettes are always available as a fallback. */
+.bottle-photo { display: block; width: 76px; max-width: 100%; height: 150px; object-fit: contain; border-radius: 8px; filter: drop-shadow(0 8px 9px #0006); }
+.is-empty .bottle-photo { opacity: .62; filter: grayscale(.85) drop-shadow(0 8px 9px #0004); }
+.detail-bottle-stage .bottle-photo { width: 104px; height: 220px; }
+.editor-preview { display: grid; place-items: center; min-height: 190px; background: radial-gradient(ellipse at center, #c8965520, transparent 65%); }
+.editor-preview .bottle-photo { width: 120px; height: 190px; }
+.editor-preview .bottle-name { max-width: 220px; }
+.photo-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.photo-actions .secondary-button { flex: 1; min-width: 100px; }
+.photo-actions .text-button { justify-content: center; width: 100%; }
+.bottle-editor select, .bottle-editor textarea { width: 100%; min-width: 0; padding: 12px; background: #1b1511; color: #f4eee7; border: 1px solid #715238; border-radius: 10px; font: inherit; line-height: 1.6; }
+.bottle-editor select { min-height: 48px; }
+.bottle-editor textarea { resize: vertical; }
+.bottle-editor textarea:focus-visible, .bottle-editor select:focus-visible { outline: 2px solid #d8a25c; outline-offset: 2px; }
+.editor-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 12px; }
+.editor-fields label { min-width: 0; }
+.form-error { color: #ffd5b4; line-height: 1.7; font-size: 13px; padding: 12px; border-left: 3px solid #d5a15e; background: #3b2518; margin: 0; overflow-wrap: anywhere; }
+button:disabled { opacity: .55; cursor: wait; }
+.edit-bottle-button { margin: -14px 0 12px auto; color: #d5b48c; }
+.demo-caption { margin: 12px 0 0; }

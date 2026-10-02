@@ -40,4 +40,13 @@ Polish and validate the first mobile UI prototype for Wine & Whisky Cabinet.
 - Keep pairing limited to owned bottles and support an empty collection.
 - Preserve unreadable stored data; report storage failures without false success.
 - Validate production build and both four-width mobile browser suites in Actions.
-- Real photo recognition, cloud sync and manual product entry remain future work.
+- Real photo recognition and cloud sync remain future work.
+
+## Follow-up: manual bottles and local photos
+- Register actual bottles with their category, product information and pairing foods.
+- Attach a camera/gallery photo; resize on-device and retain silhouette fallbacks.
+- Edit details and remove/replace photos without losing the bottle's journal or history.
+- Accept optional purchase prices without treating unknown prices as zero-cost purchases.
+- Preserve existing v1 saved collections and explicitly label manual vs demo information.
+- Validate build and mobile, persistence, and manual/photo browser suites in Actions.
+- Next: export/import for backup, then real identification with verified product sources.

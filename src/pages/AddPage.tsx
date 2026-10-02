@@ -1,11 +1,12 @@
+import { BottleEditor } from "../components/BottleEditor";
 import { useEffect, useState } from "react";
 import { Camera, ChevronLeft, Wine } from "lucide-react";
 import { BottleFigure } from "../components/BottleFigure";
 import { bottles } from "../data/mockBottles";
 import type { Bottle } from "../types";
 
-export function AddPage({ onSave }: { onSave: (bottle: Bottle) => void }) {
-  const [step, setStep] = useState<"camera" | "analyzing" | "candidates" | "confirm">("camera");
+export function AddPage({ onSave }: { onSave: (bottle: Bottle) => boolean }) {
+  const [step, setStep] = useState<"camera" | "analyzing" | "candidates" | "confirm" | "manual">("camera");
   const [selected, setSelected] = useState(bottles[0]);
   const [name, setName] = useState(bottles[0].name);
   const [price, setPrice] = useState(String(bottles[0].price));
@@ -14,10 +15,13 @@ export function AddPage({ onSave }: { onSave: (bottle: Bottle) => void }) {
     const timer = window.setTimeout(() => setStep("candidates"), 900);
     return () => window.clearTimeout(timer);
   }, [step]);
+  if (step === "manual") return <main className="page"><header className="topbar"><div><span className="eyebrow">YOUR OWN BOTTLE</span><h1>내 술 직접 등록</h1></div><button className="icon-button" aria-label="등록 메뉴로 돌아가기" onClick={() => setStep("camera")}><ChevronLeft /></button></header><BottleEditor onSave={onSave} onCancel={() => setStep("camera")} /></main>;
   return <main className="page">
     <header className="topbar"><div><span className="eyebrow">CAMERA FIRST</span><h1>새로운 한 병</h1></div>{step !== "camera" && <button className="icon-button" aria-label="촬영으로 돌아가기" onClick={() => setStep("camera")}><ChevronLeft /></button>}</header>
-    <p className="intro-copy">사진 인식 체험 · 실제 촬영·검색 없이 예시 제품으로 진행해요. 추가한 병은 이 브라우저에 저장됩니다.</p>
+    <p className="intro-copy">내 술을 직접 등록하거나 사진 인식 데모를 체험해 보세요. 추가한 병은 이 브라우저에 저장됩니다.</p>
     {step === "camera" && <section className="camera-stage">
+      <button className="camera-button" onClick={() => setStep("manual")}><Camera size={24} />내 술 직접 등록 · 사진 첨부</button>
+      <p className="intro-copy demo-caption">아래는 예시 제품으로 진행하는 사진 인식 데모입니다.</p>
       <div className="scan-frame"><div className="scan-corner tl" /><div className="scan-corner tr" /><div className="scan-corner bl" /><div className="scan-corner br" /><div className="scan-placeholder"><Wine size={72} strokeWidth={1} /><p>라벨이 잘 보이도록<br />술병 전체를 맞춰주세요</p></div><div className="scan-line" /></div>
       <button className="camera-button" onClick={() => setStep("analyzing")}><Camera size={24} />예시 사진으로 촬영 체험</button>
       <button className="secondary-button" onClick={() => setStep("candidates")}>예시 제품 목록에서 선택</button>

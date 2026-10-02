@@ -7,6 +7,9 @@ export type BottleCategory =
   | "beer"
   | "baijiu"
   | "brandy"
+  | "gin"
+  | "rum"
+  | "tequila"
   | "other";
 
 export interface Bottle {
@@ -28,4 +31,7 @@ export interface Bottle {
   rating?: number;
   finishedAt?: string;
   tastingNote?: string;
+  bottleImageUrl?: string;
+  priceIsUnknown?: boolean;
+  entrySource?: "manual" | "demo";
 }

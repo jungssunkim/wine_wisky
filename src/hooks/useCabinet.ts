@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { bottles as initialBottles } from "../data/mockBottles";
+import { categories } from "../data/categories";
+import { isLocalPhoto } from "../lib/bottlePhoto";
 import type { Bottle } from "../types";
 
 export const STORAGE_KEY = "wine-wisky:cabinet:v1";
@@ -10,13 +12,16 @@ function isBottle(value: unknown): value is Bottle {
   const b = value as Record<string, unknown>;
   return ["id", "name", "shortName", "brand", "country", "note"].every(key => typeof b[key] === "string")
     && typeof b.id === "string" && b.id.length > 0
-    && ["whisky", "wine", "sake", "beer", "baijiu", "brandy", "other"].includes(String(b.category))
+    && categories.some(c => c.value === b.category)
     && ["owned", "finished"].includes(String(b.status))
     && ["classic", "wine", "sake", "short", "tall"].includes(String(b.shape))
     && ["amber", "ruby", "clear", "green", "dark"].includes(String(b.tone))
     && ["abv", "volumeMl", "price"].every(key => typeof b[key] === "number" && Number.isFinite(b[key]) && (b[key] as number) >= 0)
     && Array.isArray(b.pairings) && b.pairings.every(p => typeof p === "string")
     && (b.rating === undefined || (typeof b.rating === "number" && Number.isFinite(b.rating) && b.rating >= 0 && b.rating <= 5))
+    && (b.bottleImageUrl === undefined || isLocalPhoto(b.bottleImageUrl))
+    && (b.priceIsUnknown === undefined || typeof b.priceIsUnknown === "boolean")
+    && (b.entrySource === undefined || b.entrySource === "manual" || b.entrySource === "demo")
     && ["region", "finishedAt", "tastingNote"].every(key => b[key] === undefined || typeof b[key] === "string");
 }
 

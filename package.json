@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test:mobile": "node qa/mobile-check.cjs",
-    "test:persistence": "node qa/persistence-check.cjs"
+    "test:persistence": "node qa/persistence-check.cjs",
+    "test:manual": "node qa/manual-entry-check.cjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^4.3.4",
