@@ -12,7 +12,8 @@
     "test:manual": "node qa/manual-entry-check.cjs",
     "test:backup": "node qa/backup-check.cjs",
     "test:ocr": "node qa/ocr-check.cjs",
-    "test:pairing": "node qa/pairing-check.cjs"
+    "test:pairing": "node qa/pairing-check.cjs",
+    "test:management": "node qa/management-check.cjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^4.3.4",

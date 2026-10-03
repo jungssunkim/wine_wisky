@@ -1,3 +1,4 @@
+import { validMetadata } from "../lib/bottleMetadata";
 import { useEffect, useRef, useState } from "react";
 import type { Bottle } from "../types";
 import { categories } from "../data/categories";
@@ -16,6 +17,10 @@ export function BottleEditor({ initial, seed, saveDisabled = false, onSave, onCa
   const [abv, setAbv] = useState(initial ? String(initial.abv) : seed && seed.abv > 0 ? String(seed.abv) : "");
   const [volume, setVolume] = useState(initial ? String(initial.volumeMl) : seed ? (seed.volumeMl > 0 ? String(seed.volumeMl) : "") : "700");
   const [price, setPrice] = useState(preset && !preset.priceIsUnknown ? String(preset.price) : "");
+  const [purchaseDate, setPurchaseDate] = useState(preset?.purchaseDate ?? "");
+  const [purchasePlace, setPurchasePlace] = useState(preset?.purchasePlace ?? "");
+  const [ageYears, setAgeYears] = useState(preset?.ageYears === undefined ? "" : String(preset.ageYears));
+  const [vintage, setVintage] = useState(preset?.vintage === undefined ? "" : String(preset.vintage));
   const [note, setNote] = useState(preset?.note ?? "");
   const [pairings, setPairings] = useState(preset?.pairings.join(", ") ?? "");
   const [photo, setPhoto] = useState(preset?.bottleImageUrl);
@@ -30,6 +35,8 @@ export function BottleEditor({ initial, seed, saveDisabled = false, onSave, onCa
     ...preset, id: initial?.id ?? "preview", name: name.trim() || "새로운 한 병",
     shortName: name.trim() || "새로운 한 병", brand: brand.trim(), category, country: country.trim(),
     region: region.trim() || undefined, abv: Number(abv), volumeMl: Number(volume), price: Number(price),
+    purchaseDate: purchaseDate || undefined, purchasePlace: purchasePlace.trim() || undefined,
+    ageYears: ageYears.trim() ? Number(ageYears) : undefined, vintage: vintage.trim() ? Number(vintage) : undefined,
     priceIsUnknown: !price.trim(), note: note.trim(),
     pairings: [...new Set(pairings.split(",").map(p => p.trim()).filter(Boolean))],
     shape: preset?.category === category ? preset.shape : appearance.shape,
@@ -60,6 +67,7 @@ export function BottleEditor({ initial, seed, saveDisabled = false, onSave, onCa
         !Number.isInteger(draft.price) || draft.price < 0 || draft.price > 1000000000) {
       setError("도수·용량·가격을 확인해 주세요."); return;
     }
+    if (!validMetadata(draft)) { setError("구매일·구매처·숙성 연수·빈티지를 확인해 주세요."); return; }
     if (draft.pairings.length > 20 || draft.pairings.some(p => p.length > 60)) {
       setError("페어링 음식은 20개까지, 이름은 각각 60자 이내로 입력해 주세요."); return;
     }
@@ -87,6 +95,12 @@ export function BottleEditor({ initial, seed, saveDisabled = false, onSave, onCa
       <label>용량 (ml) *<input type="number" required min="1" max="100000" step="1" value={volume} onChange={e => setVolume(e.target.value)} /></label>
     </div>
     <label>구매 가격 (원)<input type="number" min="0" max="1000000000" step="1" value={price} onChange={e => setPrice(e.target.value)} placeholder="모르면 비워 두세요" /></label>
+    <div className="editor-fields">
+      <label>구매일<input type="date" min="0001-01-01" max="9999-12-31" value={purchaseDate} onChange={e => setPurchaseDate(e.target.value)} /></label>
+      <label>구매처<input maxLength={100} value={purchasePlace} onChange={e => setPurchasePlace(e.target.value)} placeholder="선택 입력" /></label>
+      <label>숙성 연수 (년)<input type="number" min="0" max="200" step="1" value={ageYears} onChange={e => setAgeYears(e.target.value)} placeholder="미표기 시 비워 두세요" /></label>
+      <label>빈티지 (연도)<input type="number" min="1000" max="9999" step="1" value={vintage} onChange={e => setVintage(e.target.value)} placeholder="예: 2020" /></label>
+    </div>
     <label>술 설명<textarea rows={3} maxLength={2000} value={note} onChange={e => setNote(e.target.value)} placeholder="라벨에 적힌 특징이나 기억할 정보를 남겨보세요." /></label>
     <label>페어링 음식<textarea rows={2} maxLength={1200} value={pairings} onChange={e => setPairings(e.target.value)} placeholder="치즈, 스테이크처럼 쉼표로 구분해 주세요." /></label>
     <button className="camera-button" type="submit" disabled={busy || saveDisabled}>{initial ? "변경사항 저장" : "내 술장에 저장"}</button>

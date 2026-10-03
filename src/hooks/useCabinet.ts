@@ -52,6 +52,7 @@ export function useCabinet() {
     storageBlocked: snapshot.blocked,
     originalData: snapshot.blocked ? snapshot.raw : undefined,
     addBottle: (bottle: Bottle) => commit([...snapshot.bottles, bottle]),
+    deleteBottle: (id: string) => snapshot.bottles.some(b => b.id === id) && commit(snapshot.bottles.filter(b => b.id !== id)),
     updateBottle: (bottle: Bottle) => commit(snapshot.bottles.map(b => b.id === bottle.id ? bottle : b)),
     restoreBottles: (incoming: Bottle[], mode: "merge" | "replace") => {
       if (snapshot.blocked && mode !== "replace") return false;

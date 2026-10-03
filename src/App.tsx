@@ -1,3 +1,6 @@
+import { DeleteBottle } from "./components/DeleteBottle";
+import { SortControl } from "./components/SortControl";
+import { matchesBottle, sortBottles, type SortOrder } from "./lib/collection";
 import { PairingPage } from "./pages/PairingPage";
 import { BackupPage } from "./pages/BackupPage";
 import { BottleEditor } from "./components/BottleEditor";
@@ -32,9 +35,10 @@ export function Header({ title, eyebrow, onBack }: { title: string; eyebrow?: st
 
 function Cabinet({ onBottle, bottles, onBackup }: { onBottle: (bottle: Bottle) => void; bottles: Bottle[]; onBackup: () => void }) {
   const [query, setQuery] = useState("");
+  const [order, setOrder] = useState<SortOrder>("default");
   const [category, setCategory] = useState("all");
   const owned = bottles.filter((b) => b.status === "owned");
-  const filtered = owned.filter(b => (category === "all" || b.category === category) && `${b.name} ${b.country} ${b.brand}`.toLowerCase().includes(query.trim().toLowerCase()));
+  const filtered = sortBottles(owned.filter(b => (category === "all" || b.category === category) && matchesBottle(b, query)), order);
   const shelves = Array.from({length: Math.ceil(filtered.length / 3)}, (_, i) => filtered.slice(i * 3, i * 3 + 3));
 
   return (
@@ -47,6 +51,7 @@ function Cabinet({ onBottle, bottles, onBackup }: { onBottle: (bottle: Bottle) =
       </section>
       <label className="cabinet-search"><Search size={18} /><input aria-label="술 검색" placeholder="술 이름, 브랜드, 원산지 검색" value={query} onChange={e => setQuery(e.target.value)} /></label>
       <div className="filter-row" aria-label="술 종류">{[{value: "all", label: "전체"}, ...categories.filter(c => owned.some(b => b.category === c.value))].map(({value, label}) => <button key={value} aria-pressed={category === value} onClick={() => setCategory(value)}>{label}</button>)}</div>
+      <SortControl value={order} onChange={setOrder} />
       <section className="cabinet-shell" aria-label="보유 술 선반">
         {!filtered.length && <p className="empty-state">조건에 맞는 술이 없어요.<br />다른 이름이나 종류로 찾아보세요.</p>}
         <div className="cabinet-top-glow" />
@@ -80,12 +85,18 @@ function Cabinet({ onBottle, bottles, onBackup }: { onBottle: (bottle: Bottle) =
 }
 
 function HistoryPage({ onBottle, bottles }: { onBottle: (bottle: Bottle) => void; bottles: Bottle[] }) {
-  const finished = bottles.filter((b) => b.status === "finished");
+  const [query, setQuery] = useState("");
+  const [order, setOrder] = useState<SortOrder>("default");
+  const allFinished = bottles.filter(b => b.status === "finished");
+  const finished = sortBottles(allFinished.filter(b => matchesBottle(b, query)), order);
   return (
     <main className="page">
       <Header title="비워낸 기록" eyebrow="TASTED & REMEMBERED" />
       <p className="intro-copy">다 마신 술도 사라지지 않아요. 당신의 취향이 쌓인 선반입니다.</p>
-      {!finished.length && <p className="empty-state">아직 비워낸 병이 없어요.<br />술 상세에서 다 마신 술을 기록해 보세요.</p>}
+      <label className="cabinet-search"><Search size={18} /><input aria-label="기록 검색" value={query} onChange={e => setQuery(e.target.value)} placeholder="술 이름, 브랜드, 원산지, 시음 메모 검색" /></label>
+      <SortControl value={order} onChange={setOrder} />
+      {allFinished.length > 0 && !finished.length && <p className="empty-state">검색에 맞는 기록이 없어요.</p>}
+      {!allFinished.length && <p className="empty-state">아직 비워낸 병이 없어요.<br />술 상세에서 다 마신 술을 기록해 보세요.</p>}
       <section className="empty-grid">
         {finished.map((bottle) => (
           <div className="empty-card" key={bottle.id}>
@@ -102,7 +113,7 @@ function HistoryPage({ onBottle, bottles }: { onBottle: (bottle: Bottle) => void
   );
 }
 
-function DetailPage({ bottle, onBack, onUpdate }: { bottle: Bottle; onBack: () => void; onUpdate: (bottle: Bottle) => boolean }) {
+function DetailPage({ bottle, onBack, onUpdate, onDelete }: { bottle: Bottle; onBack: () => void; onUpdate: (bottle: Bottle) => boolean; onDelete: () => boolean }) {
   const [editing, setEditing] = useState(false);
   if (editing) return <main className="page"><Header title="술 정보 수정" eyebrow="EDIT BOTTLE" onBack={() => setEditing(false)} /><BottleEditor initial={bottle} onCancel={() => setEditing(false)} onSave={updated => { const saved = onUpdate(updated); if (saved) setEditing(false); return saved; }} /></main>;
   return (
@@ -134,6 +145,16 @@ function DetailPage({ bottle, onBack, onUpdate }: { bottle: Bottle; onBack: () =
         <span className="eyebrow">PAIRING</span>
         <div className="chip-row">{bottle.pairings.map((p) => <span className="chip" key={p}>{p}</span>)}</div>
       </section>
+      <section className="detail-section">
+        <span className="eyebrow">PURCHASE & AGE</span>
+        <dl className="purchase-details">
+          <div><dt>구매일</dt><dd>{bottle.purchaseDate ?? "미입력"}</dd></div>
+          <div><dt>구매처</dt><dd>{bottle.purchasePlace || "미입력"}</dd></div>
+          <div><dt>숙성 연수</dt><dd>{bottle.ageYears === undefined ? "미입력" : bottle.ageYears + "년"}</dd></div>
+          <div><dt>빈티지</dt><dd>{bottle.vintage ?? "미입력"}</dd></div>
+        </dl>
+      </section>
+      <DeleteBottle name={bottle.name} onDelete={onDelete} />
       <BottleJournal key={bottle.id} bottle={bottle} onUpdate={onUpdate} />
       <section className="detail-section source-preview">
         <span className="eyebrow">PRODUCT SOURCES</span>
@@ -156,7 +177,7 @@ function BottomNav({ active, onChange }: { active: Tab; onChange: (tab: Tab) => 
 }
 
 export default function App() {
-  const { bottles, storageError, storageBlocked, originalData, addBottle, updateBottle, restoreBottles } = useCabinet();
+  const { bottles, storageError, storageBlocked, originalData, addBottle, updateBottle, deleteBottle, restoreBottles } = useCabinet();
   const [screen, setScreen] = useState<Screen>({ type: "tab", tab: "cabinet" });
   const activeTab = screen.type === "tab" ? screen.tab : screen.from;
   const openBottle = (bottle: Bottle) => setScreen({ type: "detail", bottle, from: activeTab });
@@ -166,7 +187,7 @@ export default function App() {
       <div className="ambient ambient-one" /><div className="ambient ambient-two" />
       {storageError && <p className="storage-alert" role="alert">{storageError}</p>}
       {screen.type === "detail" ? (
-        <DetailPage bottle={bottles.find(b => b.id === screen.bottle.id) ?? screen.bottle} onUpdate={updateBottle} onBack={() => setScreen({ type: "tab", tab: screen.from })} />
+        <DetailPage onDelete={() => { const saved = deleteBottle(screen.bottle.id); if (saved) setScreen({type: "tab", tab: screen.from}); return saved; }} bottle={bottles.find(b => b.id === screen.bottle.id) ?? screen.bottle} onUpdate={updateBottle} onBack={() => setScreen({ type: "tab", tab: screen.from })} />
       ) : (
         <>
           {screen.tab === "cabinet" && <Cabinet bottles={bottles} onBottle={openBottle} onBackup={() => setScreen({type: "tab", tab: "backup"})} />}

@@ -30,6 +30,10 @@ export interface Bottle {
   tone: "amber" | "ruby" | "clear" | "green" | "dark";
   rating?: number;
   finishedAt?: string;
+  purchaseDate?: string;
+  purchasePlace?: string;
+  ageYears?: number;
+  vintage?: number;
   tastingNote?: string;
   bottleImageUrl?: string;
   priceIsUnknown?: boolean;

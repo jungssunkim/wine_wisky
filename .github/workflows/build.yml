@@ -43,6 +43,7 @@ jobs:
           npm run test:backup
           npm run test:ocr
           npm run test:pairing
+          npm run test:management
 
       - name: Upload web build
         uses: actions/upload-artifact@v4

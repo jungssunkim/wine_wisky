@@ -1,3 +1,4 @@
+import { validMetadata } from "./bottleMetadata";
 import { categories } from "../data/categories";
 import { isLocalPhoto } from "./bottlePhoto";
 import type { Bottle } from "../types";
@@ -12,7 +13,7 @@ export function isSourceLink(value: unknown): value is { title: string; url: str
 export function isBottle(value: unknown): value is Bottle {
   if (!value || typeof value !== "object") return false;
   const b = value as Record<string, unknown>;
-  return ["id", "name", "shortName", "brand", "country", "note"].every(key => typeof b[key] === "string")
+  return validMetadata(b) && ["id", "name", "shortName", "brand", "country", "note"].every(key => typeof b[key] === "string")
     && typeof b.id === "string" && b.id.length > 0
     && categories.some(c => c.value === b.category)
     && ["owned", "finished"].includes(String(b.status))
@@ -54,6 +55,7 @@ function cleanBottle(b: Bottle): Bottle {
     shape: b.shape, tone: b.tone, rating: b.rating,
     finishedAt: b.finishedAt, tastingNote: b.tastingNote,
     bottleImageUrl: b.bottleImageUrl, priceIsUnknown: b.priceIsUnknown, entrySource: b.entrySource,
+    purchaseDate: b.purchaseDate, purchasePlace: b.purchasePlace, ageYears: b.ageYears, vintage: b.vintage,
     sourceLinks: b.sourceLinks?.map(link => ({title: link.title, url: link.url}))
   };
 }

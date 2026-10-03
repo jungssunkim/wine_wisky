@@ -74,3 +74,11 @@ Polish and validate the first mobile UI prototype for Wine & Whisky Cabinet.
 - Show selectable foods from owned bottles and explain which saved food matched.
 - Show all matches; never include finished bottles or invent pairing recommendations.
 - Cover aliases, partial-name rejection, empty states and mobile detail navigation in CI.
+
+## Follow-up: everyday collection management
+- Confirm deletion of incorrectly registered bottles; retain records on failed or stale writes.
+- Keep completion/archive separate from permanent deletion.
+- Add optional purchase date/place, age and vintage to editing, detail, local persistence and backups.
+- Validate metadata while retaining compatibility with existing v1 collections.
+- Add stable name/rating/price sorting (unknown values last) and History search including tasting notes.
+- Verify mobile flows and all previous suites in Actions before main integration.

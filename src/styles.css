@@ -285,3 +285,14 @@ button:disabled { opacity: .55; cursor: wait; }
 .food-chip { min-width: 44px; min-height: 44px; max-width: 100%; overflow-wrap: anywhere; padding: 10px 14px; border: 1px solid #715238; border-radius: 24px; background: #201811; color: #ead8c2; font: inherit; font-size: 13px; }
 .food-chip[aria-pressed="true"] { background: #d5a15e; color: #201811; }
 .pairing-copy { min-width: 0; overflow-wrap: anywhere; }
+
+.sort-control { display: flex; align-items: center; justify-content: flex-end; gap: 12px; margin: 16px 0; color: #cbb8a5; font-size: 13px; }
+.sort-control select { min-height: 44px; max-width: 75%; background: #201811; color: #ead8c2; border: 1px solid #715238; border-radius: 10px; padding: 8px 12px; font: inherit; }
+.purchase-details { margin: 16px 0; }
+.purchase-details > div { display: grid; grid-template-columns: 90px minmax(0,1fr); gap: 12px; padding: 8px 0; font-size: 14px; }
+.purchase-details dt { color: #b7a494; }
+.purchase-details dd { margin: 0; overflow-wrap: anywhere; }
+.delete-section p { font-size: 13px; line-height: 1.7; overflow-wrap: anywhere; color: #cbb8a5; }
+.delete-section .secondary-button { width: 100%; margin-top: 10px; }
+.delete-confirm { color: #ffb4a5; border-color: #a55b48; }
+.editor-fields input { min-width: 0; max-width: 100%; }
