@@ -246,3 +246,23 @@ button:disabled { opacity: .55; cursor: wait; }
 .empty-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .empty-card, .empty-meta { min-width: 0; }
 .chip { max-width: 100%; overflow-wrap: anywhere; }
+
+.cabinet-save-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: -14px 0 12px; }
+.cabinet-save-row .local-save-note { margin: 0; }
+.cabinet-save-row .text-button { color: #d5b48c; flex-shrink: 0; min-width: 44px; }
+.backup-section { padding: 20px 0; border-top: 1px solid #ffffff18; }
+.backup-section h2 { font-size: 19px; font-weight: 500; margin: 0 0 14px; }
+.backup-section p, .backup-preview li, .backup-message { font-size: 13px; line-height: 1.7; color: #c9b8a7; }
+.backup-section > button, .backup-preview > button { width: 100%; margin-top: 12px; }
+.backup-section .secondary-button { display: flex; align-items: center; justify-content: center; gap: 10px; }
+.backup-section .backup-help { font-size: 12px; color: #b7a494; }
+.backup-preview { margin-top: 24px; border-top: 1px solid #725138; padding-top: 12px; }
+.backup-preview h3 { font-size: 18px; font-weight: 500; }
+.backup-filename, .backup-preview li { overflow-wrap: anywhere; }
+.backup-preview ul { padding-left: 20px; }
+.backup-preview li span { color: #d7a86e; margin-left: 8px; white-space: nowrap; }
+.restore-options { margin: 20px 0 10px; border: 0; padding: 0; min-width: 0; }
+.restore-options legend { font-size: 13px; color: #d5a15e; margin-bottom: 6px; }
+.restore-options label, .restore-confirm { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 6px 0; font-size: 13px; line-height: 1.6; cursor: pointer; }
+.restore-options input, .restore-confirm input { width: 22px; height: 22px; flex-shrink: 0; accent-color: #d5a15e; margin: 0; }
+.backup-message { color: #efd0a6; }

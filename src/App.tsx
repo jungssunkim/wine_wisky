@@ -1,3 +1,4 @@
+import { BackupPage } from "./pages/BackupPage";
 import { BottleEditor } from "./components/BottleEditor";
 import { categories } from "./data/categories";
 import { BottleFigure } from "./components/BottleFigure";
@@ -11,7 +12,7 @@ import { useCabinet } from "./hooks/useCabinet";
 import { BottleJournal } from "./components/BottleJournal";
 import type { Bottle } from "./types";
 
-type Tab = "cabinet" | "history" | "add" | "pairing";
+type Tab = "cabinet" | "history" | "add" | "pairing" | "backup";
 type Screen = { type: "tab"; tab: Tab } | { type: "detail"; bottle: Bottle; from: Tab };
 
 export function Header({ title, eyebrow, onBack }: { title: string; eyebrow?: string; onBack?: () => void }) {
@@ -28,7 +29,7 @@ export function Header({ title, eyebrow, onBack }: { title: string; eyebrow?: st
   );
 }
 
-function Cabinet({ onBottle, bottles }: { onBottle: (bottle: Bottle) => void; bottles: Bottle[] }) {
+function Cabinet({ onBottle, bottles, onBackup }: { onBottle: (bottle: Bottle) => void; bottles: Bottle[]; onBackup: () => void }) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("all");
   const owned = bottles.filter((b) => b.status === "owned");
@@ -38,7 +39,7 @@ function Cabinet({ onBottle, bottles }: { onBottle: (bottle: Bottle) => void; bo
   return (
     <main className="page">
       <Header title="나의 술장" eyebrow="PRIVATE COLLECTION" />
-      <p className="local-save-note">이 브라우저에 저장됩니다 · 기기 간 동기화 없음</p>
+      <div className="cabinet-save-row"><p className="local-save-note">이 브라우저에 저장됩니다</p><button className="text-button" onClick={onBackup}>백업·복원</button></div>
       <section className="collection-summary">
         <div><span>현재 보유</span><strong>{owned.length}병의 컬렉션</strong></div>
         <div className="summary-badge"><Sparkles size={16} /> 취향을 담은 선반</div>
@@ -194,7 +195,7 @@ function BottomNav({ active, onChange }: { active: Tab; onChange: (tab: Tab) => 
 }
 
 export default function App() {
-  const { bottles, storageError, addBottle, updateBottle } = useCabinet();
+  const { bottles, storageError, storageBlocked, originalData, addBottle, updateBottle, restoreBottles } = useCabinet();
   const [screen, setScreen] = useState<Screen>({ type: "tab", tab: "cabinet" });
   const activeTab = screen.type === "tab" ? screen.tab : screen.from;
   const openBottle = (bottle: Bottle) => setScreen({ type: "detail", bottle, from: activeTab });
@@ -207,10 +208,11 @@ export default function App() {
         <DetailPage bottle={bottles.find(b => b.id === screen.bottle.id) ?? screen.bottle} onUpdate={updateBottle} onBack={() => setScreen({ type: "tab", tab: screen.from })} />
       ) : (
         <>
-          {screen.tab === "cabinet" && <Cabinet bottles={bottles} onBottle={openBottle} />}
+          {screen.tab === "cabinet" && <Cabinet bottles={bottles} onBottle={openBottle} onBackup={() => setScreen({type: "tab", tab: "backup"})} />}
           {screen.tab === "history" && <HistoryPage bottles={bottles} onBottle={openBottle} />}
           {screen.tab === "add" && <AddPage onSave={bottle => { const saved = addBottle(bottle); if (saved) setScreen({type: "tab", tab: "cabinet"}); return saved; }} />}
           {screen.tab === "pairing" && <PairingPage bottles={bottles} onBottle={openBottle} />}
+          {screen.tab === "backup" && <BackupPage bottles={bottles} blocked={storageBlocked} originalData={originalData} onRestore={restoreBottles} onBack={() => setScreen({type: "tab", tab: "cabinet"})} />}
           <BottomNav active={activeTab} onChange={(tab) => setScreen({ type: "tab", tab })} />
         </>
       )}
