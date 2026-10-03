@@ -85,3 +85,16 @@ References:
 - https://www.themacallan.com/en-sg/single-malt-scotch-whisky/sherry-oak-12-years-old
 
 `npm run test:ocr` includes a real-engine browser smoke test on a generated English label, four-width confirmation/persistence flows, misleading-variant rejection, and isolated network-failure/cancellation tests. It does not establish accuracy on real bottle photos or physical-phone camera compatibility. Non-English OCR, unrestricted product search, cloud recognition and live prices remain future work. Older camera demo buttons remain explicitly labelled as examples.
+
+## Web deployment and final review
+
+The Build workflow validates the production build and all browser suites before publishing main to GitHub Pages. Pull requests only build and test; they do not publish. A production smoke test serves dist under /wine_wisky/ and checks four mobile widths, navigation, refresh and asset loading. Download mobile-production-screenshots from the workflow artifacts for cabinet screenshots.
+
+One-time repository setup: Settings → Pages → Build and deployment → Source → GitHub Actions. If the deployment job failed before activation, use Actions → Build → the main run → Re-run failed jobs. Alternatively run Build manually on main. Do not create a separate suggested Pages workflow; deployment is already part of Build.
+
+Expected address after a successful deployment: https://jungssunkim.github.io/wine_wisky/
+This address is not proof of a successful deployment; check the deploy job's environment URL and status first.
+
+The website code and bundled demo bottles are public. Personal bottle photos, notes and purchase information remain in that browser's localStorage and are not included in deployments. Browser/device/domain changes do not transfer the collection: export a backup on the old origin and import it on the new one.
+
+Final physical-phone review: open the successful deployment URL, register a photo, edit purchase information, save a tasting note, mark a bottle finished, search History, verify pairing, then export a backup. Use an expendable test bottle to review permanent deletion. Real photo OCR accuracy and the device camera picker still require physical-phone testing.

@@ -7,6 +7,9 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -45,8 +48,43 @@ jobs:
           npm run test:pairing
           npm run test:management
 
+      - name: Check production build under repository path
+        run: node qa/production-check.cjs
+
+      - name: Upload mobile screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-production-screenshots
+          path: /tmp/wine-production-*.png
+
+      - name: Upload Pages build
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
       - name: Upload web build
         uses: actions/upload-artifact@v4
         with:
           name: wine-wisky-web
           path: dist
+
+  deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    concurrency:
+      group: github-pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check Pages configuration
+        uses: actions/configure-pages@v5
+      - name: Deploy verified build
+        id: deployment
+        uses: actions/deploy-pages@v4

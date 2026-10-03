@@ -82,3 +82,10 @@ Polish and validate the first mobile UI prototype for Wine & Whisky Cabinet.
 - Validate metadata while retaining compatibility with existing v1 collections.
 - Add stable name/rating/price sorting (unknown values last) and History search including tasting notes.
 - Verify mobile flows and all previous suites in Actions before main integration.
+
+## Follow-up: web deployment
+- Publish only verified main builds to GitHub Pages with a separate least-privilege deployment job.
+- Smoke-test production assets under the repository URL path at four mobile widths.
+- Preserve downloadable mobile screenshots in Actions.
+- Document one-time Pages activation, reruns, local-data transfer and final phone review.
+- Verify deployment status before presenting the expected address as a working link.
