@@ -49,7 +49,7 @@ const KEY = 'wine-wisky:cabinet:v1';
   await page.getByRole('button',{name:'진',exact:true}).click();
   assert.equal(await page.locator('.shelf .bottle-item').count(),1);
   await page.getByRole('button',{name:'나의 수제 진',exact:true}).click();
-  await page.getByText('미입력',{exact:true}).waitFor();
+  await page.locator('.stat-grid').getByText('미입력',{exact:true}).waitFor();
   await page.waitForFunction(()=>document.querySelector('.detail-bottle-stage img')?.naturalWidth===800);
   await page.getByRole('button',{name:'술 정보 수정',exact:true}).click();
   await page.getByRole('textbox',{name:'제품명 *',exact:true}).fill('취소할 이름');
