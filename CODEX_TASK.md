@@ -67,3 +67,10 @@ Polish and validate the first mobile UI prototype for Wine & Whisky Cabinet.
 - Persist/backup safe HTTPS source links; discard stale attribution on identity edits.
 - Validate all earlier suites plus real-engine OCR and candidate flows.
 - Do not describe this as universal bottle identification; real-world photo accuracy remains unmeasured.
+
+## Follow-up: owned-food pairing
+- Extract the pairing screen and food matching into dedicated modules.
+- Match complete normalized food names and a small explicit Korean/English alias list.
+- Show selectable foods from owned bottles and explain which saved food matched.
+- Show all matches; never include finished bottles or invent pairing recommendations.
+- Cover aliases, partial-name rejection, empty states and mobile detail navigation in CI.

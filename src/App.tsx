@@ -1,9 +1,10 @@
+import { PairingPage } from "./pages/PairingPage";
 import { BackupPage } from "./pages/BackupPage";
 import { BottleEditor } from "./components/BottleEditor";
 import { categories } from "./data/categories";
 import { BottleFigure } from "./components/BottleFigure";
 import { AddPage } from "./pages/AddPage";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   Camera, ChevronLeft, ChevronRight, GlassWater, History, Home,
   Search, Sparkles, UtensilsCrossed, Wine
@@ -95,47 +96,6 @@ function HistoryPage({ onBottle, bottles }: { onBottle: (bottle: Bottle) => void
               {bottle.rating !== undefined && <span>★ {bottle.rating.toFixed(1)}</span>}
             </div>
           </div>
-        ))}
-      </section>
-    </main>
-  );
-}
-
-function PairingPage({ onBottle, bottles }: { onBottle: (bottle: Bottle) => void; bottles: Bottle[] }) {
-  const [food, setFood] = useState("삼겹살");
-  const [submitted, setSubmitted] = useState("삼겹살");
-  const suggestions = useMemo(() => {
-    const owned = bottles.filter((b) => b.status === "owned");
-    const exact = owned.filter((b) => b.pairings.some((p) => p.includes(submitted) || submitted.includes(p)));
-    return submitted ? exact.slice(0, 3) : [];
-  }, [submitted, bottles]);
-
-  return (
-    <main className="page">
-      <Header title="음식과 한 잔" eyebrow="FROM YOUR CABINET" />
-      <section className="pairing-hero">
-        <UtensilsCrossed size={30} />
-        <h2>오늘 뭐 먹어요?</h2>
-        <p>내 술장 안에서 가장 잘 어울리는 한 병을 골라볼게요.</p>
-        <form className="food-input-wrap" onSubmit={e => { e.preventDefault(); setSubmitted(food.trim()); }}>
-          <input aria-label="페어링할 음식" value={food} onChange={(e) => setFood(e.target.value)} placeholder="예: 삼겹살, 회, 파스타" />
-          <button type="submit">추천</button>
-        </form>
-      </section>
-      <section className="pairing-results">
-        <span className="eyebrow">내가 가진 술에서 추천</span>
-        <p className="intro-copy pairing-status" role="status">{!submitted ? "음식 이름을 입력해 주세요." : suggestions.length ? `${submitted}에 어울리는 ${suggestions.length}병 · 등록한 페어링 음식 기준` : `“${submitted}”에 맞는 보유 술이 없어요. 삼겹살, 회, 치즈로 시도해 보세요.`}</p>
-        {suggestions.map((bottle, index) => (
-          <button className="pairing-card" key={bottle.id} onClick={() => onBottle(bottle)}>
-            <span className="rank">0{index + 1}</span>
-            <div className="mini-bottle-wrap"><BottleFigure bottle={bottle} /></div>
-            <div className="pairing-copy">
-              <strong>{bottle.shortName}</strong>
-              <span>{bottle.country} · {bottle.abv}%</span>
-              <p>{bottle.note}</p>
-            </div>
-            <ChevronRight size={18} />
-          </button>
         ))}
       </section>
     </main>

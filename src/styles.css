@@ -279,3 +279,9 @@ button:disabled { opacity: .55; cursor: wait; }
 .supported-products summary { min-height: 44px; padding: 12px 0; cursor: pointer; color: #d5a15e; }
 .supported-products ul { padding-left: 20px; }
 .scan-page .backup-help { font-size: 12px; line-height: 1.7; color: #b7a494; }
+
+.pairing-foods { margin: 24px 0; }
+.pairing-foods > p, .pairing-help { color: #b7a494; font-size: 12px; line-height: 1.7; }
+.food-chip { min-width: 44px; min-height: 44px; max-width: 100%; overflow-wrap: anywhere; padding: 10px 14px; border: 1px solid #715238; border-radius: 24px; background: #201811; color: #ead8c2; font: inherit; font-size: 13px; }
+.food-chip[aria-pressed="true"] { background: #d5a15e; color: #201811; }
+.pairing-copy { min-width: 0; overflow-wrap: anywhere; }
