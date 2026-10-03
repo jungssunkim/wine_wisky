@@ -53,6 +53,13 @@ const assert = require('node:assert/strict');
   const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('wine-wisky:cabinet:v1')).bottles.at(-1));
   assert(saved.id!=='scan-draft');assert(saved.priceIsUnknown);assert.equal(saved.sourceLinks.length,1);
   if(width===360) assert(saved.bottleImageUrl);
+  const backup=await page.evaluate(async bottle=>{
+   const data=await import('/src/lib/cabinetData.ts');
+   let unsafeRejected=false;
+   try { data.parseBackup(JSON.stringify({version:1,bottles:[{...bottle,sourceLinks:[{title:'unsafe',url:'javascript:alert(1)'}]}]})); } catch { unsafeRejected=true; }
+   return {links:data.parseBackup(data.serializeBackup([bottle]))[0].sourceLinks,unsafeRejected};
+  },saved);
+  assert.deepEqual(backup.links,saved.sourceLinks);assert(backup.unsafeRejected);
   // Renaming to another product must not retain misleading source attribution.
   await page.getByRole('button',{name:'술 정보 수정',exact:true}).click();
   await page.getByRole('textbox',{name:'제품명 *',exact:true}).fill('다른 위스키');

@@ -43,7 +43,7 @@ npm run dev
 - The browser check covers 360, 390, 412 and 430px: all five screens, search/category filtering, detail return navigation, empty pairing input, camera candidate confirmation, and adding a seventh bottle on a new shelf. It also checks horizontal overflow, nested buttons, runtime errors and minimum button dimensions.
 - `npm run build` validates TypeScript and production assets.
 
-The camera flow and pairing results use bundled demo data. Added bottles, tasting notes, ratings and finished/owned status are saved in this browser's localStorage. Data is not synced between devices; clearing browser site data removes it. Corrupt/unsupported saved data is preserved and a warning is shown. Failed writes leave the previous collection unchanged. Real photo recognition, source lookup, cloud sync and AI pairing remain future work.
+The app retains an explicitly labelled camera demo; the separate English-label flow performs real on-device OCR. Pairing uses the foods recorded with each bottle. Added bottles, tasting notes, ratings and finished/owned status are saved in this browser's localStorage. Data is not synced between devices; clearing browser site data removes it. Corrupt/unsupported saved data is preserved and a warning is shown. Failed writes leave the previous collection unchanged. Broad product recognition, unrestricted source lookup, cloud sync and AI pairing remain future work.
 
 ## Local collection and tasting journal
 
@@ -57,7 +57,7 @@ Use “내 술 직접 등록 · 사진 첨부” in Add Bottle. Enter a name, ca
 
 Photo capture uses the device file picker with a rear-camera hint; the exact picker depends on the phone/browser. JPG, PNG and WebP files up to 10MB and 50 megapixels are decoded on-device, resized to at most 800px and re-encoded to JPEG. Only the reduced image (up to 360,000 data-URL characters) is saved. Originals and metadata are not uploaded or stored. HEIC is not supported. Browser storage is limited; if saving fails, the editor retains its draft and the existing collection remains unchanged. Removing a photo restores the category silhouette; unreadable photos also fall back to it.
 
-Real photo recognition/OCR remains a demo. Uploaded photos are not sent for identification. Manually entered pairing foods power the existing matching logic.
+English OCR and the bounded product catalogue are available as described below. Uploaded photos are not sent to an identification server. Manually entered pairing foods power the existing matching logic.
 
 Run `npm run test:manual` with the dev server running to verify registration, photo processing, editing/cancel, invalid uploads, storage errors, reload persistence, history and pairing at all four mobile widths. Actions runs all three browser suites.
 
