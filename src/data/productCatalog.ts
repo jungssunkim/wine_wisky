@@ -34,7 +34,7 @@ export function makeScanDraft(text: string, photo?: string, product?: CatalogPro
   const volumeMl = volume ? Number(volume[1]) * (volume[2].toLowerCase() === "cl" ? 10 : 1) : 0;
   return {
     id: "scan-draft", name: product?.name ?? text.split("\n").find(t => t.trim())?.trim().slice(0, 100) ?? "",
-    shortName: product?.name ?? "", brand: product?.brand ?? "", category: product ? "whisky" : "other",
+    shortName: product?.name ?? text.split("\n").find(t => t.trim())?.trim().slice(0, 100) ?? "", brand: product?.brand ?? "", category: product ? "whisky" : "other",
     country: product?.country ?? "", abv: abv ? Number(abv[1]) : product?.abv ?? 0,
     volumeMl: volumeMl > 0 && volumeMl <= 100000 ? volumeMl : 0,
     price: 0, priceIsUnknown: true, note: product?.note ?? "", pairings: [],

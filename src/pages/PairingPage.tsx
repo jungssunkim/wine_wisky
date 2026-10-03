@@ -1,13 +1,14 @@
-import { useState } from "react";
 import { ChevronRight, UtensilsCrossed } from "lucide-react";
 import { Header } from "../App";
 import { BottleFigure } from "../components/BottleFigure";
 import { availableFoods, findPairings, foodKey } from "../lib/pairing";
 import type { Bottle } from "../types";
 
-export function PairingPage({ onBottle, bottles }: { onBottle: (bottle: Bottle) => void; bottles: Bottle[] }) {
-  const [food, setFood] = useState("삼겹살");
-  const [submitted, setSubmitted] = useState("삼겹살");
+type PairingView = { food: string; submitted: string };
+export function PairingPage({ onBottle, bottles, view, onView }: { onBottle: (bottle: Bottle) => void; bottles: Bottle[]; view: PairingView; onView: (view: PairingView) => void }) {
+  const { food, submitted } = view;
+  const setFood = (food: string) => onView({ ...view, food });
+  const setSubmitted = (submitted: string) => onView({ ...view, submitted });
   const suggestions = findPairings(bottles, submitted);
   const foods = availableFoods(bottles);
   const ownedCount = bottles.filter(b => b.status === "owned").length;
@@ -26,7 +27,7 @@ export function PairingPage({ onBottle, bottles }: { onBottle: (bottle: Bottle) 
       </section>
       {foods.length > 0 && <section className="pairing-foods" aria-label="등록된 페어링 음식">
         <p>술장에 등록된 음식</p>
-        <div className="chip-row">{foods.map(item => <button key={foodKey(item)} className="food-chip" aria-pressed={foodKey(submitted) === foodKey(item)} onClick={() => { setFood(item); setSubmitted(item); }}>{item}</button>)}</div>
+        <div className="chip-row">{foods.map(item => <button key={foodKey(item)} className="food-chip" aria-pressed={foodKey(submitted) === foodKey(item)} onClick={() => { onView({ food: item, submitted: item }); }}>{item}</button>)}</div>
       </section>}
       <section className="pairing-results">
         <span className="eyebrow">내가 가진 술에서 추천</span>
