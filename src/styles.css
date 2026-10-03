@@ -266,3 +266,16 @@ button:disabled { opacity: .55; cursor: wait; }
 .restore-options label, .restore-confirm { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 6px 0; font-size: 13px; line-height: 1.6; cursor: pointer; }
 .restore-options input, .restore-confirm input { width: 22px; height: 22px; flex-shrink: 0; accent-color: #d5a15e; margin: 0; }
 .backup-message { color: #efd0a6; }
+
+.scan-photo { display: block; width: 100%; max-height: 280px; object-fit: contain; margin: 18px 0; background: #15100d; border-radius: 14px; }
+.scan-read { width: 100%; margin: 12px 0; }
+.scan-query textarea { width: 100%; min-width: 0; padding: 12px; background: #1b1511; color: #f4eee7; border: 1px solid #715238; border-radius: 10px; font: inherit; resize: vertical; }
+.source-link { display: flex; align-items: center; min-height: 44px; color: #e3b67c; font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; padding: 8px 0; }
+.scan-page .photo-actions button { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.scan-candidate { padding: 16px 0; border-bottom: 1px solid #715238; }
+.scan-candidate h3 { font-size: 18px; overflow-wrap: anywhere; }
+.scan-candidate p, .scan-results > p, .supported-products { font-size: 13px; line-height: 1.7; color: #cbb8a5; }
+.scan-candidate button { width: 100%; padding: 12px; }
+.supported-products summary { min-height: 44px; padding: 12px 0; cursor: pointer; color: #d5a15e; }
+.supported-products ul { padding-left: 20px; }
+.scan-page .backup-help { font-size: 12px; line-height: 1.7; color: #b7a494; }

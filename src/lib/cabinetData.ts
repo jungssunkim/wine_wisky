@@ -2,6 +2,13 @@ import { categories } from "../data/categories";
 import { isLocalPhoto } from "./bottlePhoto";
 import type { Bottle } from "../types";
 
+export function isSourceLink(value: unknown): value is { title: string; url: string } {
+  if (!value || typeof value !== "object") return false;
+  const link = value as Record<string, unknown>;
+  if (typeof link.title !== "string" || !link.title.trim() || link.title.length > 150 || typeof link.url !== "string" || link.url.length > 2000) return false;
+  try { const url = new URL(link.url); return url.protocol === "https:" && !url.username && !url.password; } catch { return false; }
+}
+
 export function isBottle(value: unknown): value is Bottle {
   if (!value || typeof value !== "object") return false;
   const b = value as Record<string, unknown>;
@@ -14,6 +21,7 @@ export function isBottle(value: unknown): value is Bottle {
     && ["abv", "volumeMl", "price"].every(key => typeof b[key] === "number" && Number.isFinite(b[key]) && (b[key] as number) >= 0)
     && Array.isArray(b.pairings) && b.pairings.every(p => typeof p === "string")
     && (b.rating === undefined || (typeof b.rating === "number" && Number.isFinite(b.rating) && b.rating >= 0 && b.rating <= 5))
+    && (b.sourceLinks === undefined || (Array.isArray(b.sourceLinks) && b.sourceLinks.length <= 3 && b.sourceLinks.every(isSourceLink)))
     && (b.bottleImageUrl === undefined || isLocalPhoto(b.bottleImageUrl))
     && (b.priceIsUnknown === undefined || typeof b.priceIsUnknown === "boolean")
     && (b.entrySource === undefined || b.entrySource === "manual" || b.entrySource === "demo")
@@ -45,7 +53,8 @@ function cleanBottle(b: Bottle): Bottle {
     status: b.status, note: b.note, pairings: [...b.pairings],
     shape: b.shape, tone: b.tone, rating: b.rating,
     finishedAt: b.finishedAt, tastingNote: b.tastingNote,
-    bottleImageUrl: b.bottleImageUrl, priceIsUnknown: b.priceIsUnknown, entrySource: b.entrySource
+    bottleImageUrl: b.bottleImageUrl, priceIsUnknown: b.priceIsUnknown, entrySource: b.entrySource,
+    sourceLinks: b.sourceLinks?.map(link => ({title: link.title, url: link.url}))
   };
 }
 

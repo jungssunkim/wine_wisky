@@ -34,4 +34,5 @@ export interface Bottle {
   bottleImageUrl?: string;
   priceIsUnknown?: boolean;
   entrySource?: "manual" | "demo";
+  sourceLinks?: { title: string; url: string }[];
 }

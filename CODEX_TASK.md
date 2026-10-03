@@ -58,3 +58,12 @@ Polish and validate the first mobile UI prototype for Wine & Whisky Cabinet.
 - Keep previous data intact on parse, quota and stale-tab failures.
 - Support recovery from unreadable storage while preserving its original text.
 - Validate build and all four mobile browser suites in Actions.
+
+## Follow-up: actual English OCR
+- Load a pinned browser OCR engine on demand; keep photos on-device.
+- Match against four explicitly supported, manufacturer-sourced products.
+- Require text review, source access, candidate confirmation and ABV/volume review.
+- Keep unknown product/manual, cancel and network-error paths usable.
+- Persist/backup safe HTTPS source links; discard stale attribution on identity edits.
+- Validate all earlier suites plus real-engine OCR and candidate flows.
+- Do not describe this as universal bottle identification; real-world photo accuracy remains unmeasured.

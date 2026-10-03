@@ -41,6 +41,7 @@ jobs:
           npm run test:persistence
           npm run test:manual
           npm run test:backup
+          npm run test:ocr
 
       - name: Upload web build
         uses: actions/upload-artifact@v4

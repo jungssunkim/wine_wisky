@@ -176,8 +176,9 @@ function DetailPage({ bottle, onBack, onUpdate }: { bottle: Bottle; onBack: () =
       </section>
       <BottleJournal key={bottle.id} bottle={bottle} onUpdate={onUpdate} />
       <section className="detail-section source-preview">
-        <span className="eyebrow">SOURCE PREVIEW</span>
-        <p>{bottle.entrySource === "manual" ? "직접 등록·수정한 정보입니다. 사진 자동 인식이나 웹 검색 결과가 아닙니다." : "앱에 포함된 예시 제품 정보입니다. 실제 제품 식별 기능에서는 공식 홈페이지와 참고 출처를 표시할 예정입니다."}</p>
+        <span className="eyebrow">PRODUCT SOURCES</span>
+        {bottle.sourceLinks?.map(link => <a className="source-link" key={link.url} href={link.url} target="_blank" rel="noopener noreferrer">{link.title} ↗</a>)}
+        <p>{bottle.entrySource === "manual" ? "직접 확인·입력한 정보입니다. 참고 링크가 있으면 원문과 실제 병을 함께 확인해 주세요." : "앱에 포함된 예시 제품 정보입니다. 실제 제품 식별 기능에서는 공식 홈페이지와 참고 출처를 표시할 예정입니다."}</p>
       </section>
     </main>
   );

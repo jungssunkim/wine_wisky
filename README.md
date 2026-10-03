@@ -70,3 +70,18 @@ Import first validates and previews a file. The default mode adds new bottle IDs
 Malformed/unsupported files, invalid records, duplicate IDs and external image URLs are rejected before writes. A failed storage write leaves the original collection unchanged. If stored data is unreadable, export its exact original text or recover from a valid backup using confirmed replacement. The unreadable original is copied to `wine-wisky:recovery:v1` before recovery; if that copy or replacement fails, the original remains intact. Writes also refuse to overwrite data changed by another tab: reload before retrying.
 
 With the dev server running, `npm run test:backup` verifies downloads, photo/journal roundtrips, merge deduplication, replace confirmation/cancel, empty restores, invalid inputs, quota failures, recovery and stale-write protection at all four mobile widths.
+
+## English label OCR and source-backed candidates
+
+“사진으로 술 찾기 · 영문 라벨” now reads a selected photo with real, on-device Tesseract.js OCR. The pinned browser engine (6.0.1), core (6.0.0) and English model are loaded from public CDNs when the user starts recognition. Internet access is required for those assets; photos are processed locally and are not uploaded. Recognition can fail on glare, curved bottles or ornate/small type. Cancel/error paths keep manual entry available.
+
+This is a bounded catalogue matcher, not full-web identification or authenticity verification. The four supported products are Balvenie DoubleWood 12, Johnnie Walker Black Label, Glenfiddich 12 and Macallan Sherry Oak 12. Manufacturer pages were checked on 2026-10-03. Users review OCR text, choose a candidate, open its source, explicitly confirm identity, and review/edit ABV and volume before saving. Unread volume and price are left blank; no prices or pairings are invented. Unknown products have an external search link and manual registration fallback. Source links survive storage/backups and are cleared when product identity is changed.
+
+References:
+- https://github.com/naptha/tesseract.js/blob/v6.0.1/docs/api.md
+- https://github.com/naptha/tesseract.js/blob/v6.0.1/docs/local-installation.md
+- https://www.williamgrant.com/nutritional-information/?brand-nutrition=glenfiddich
+- https://www.johnniewalker.com/en/our-whisky/core-range/johnnie-walker-black-label
+- https://www.themacallan.com/en-sg/single-malt-scotch-whisky/sherry-oak-12-years-old
+
+`npm run test:ocr` includes a real-engine browser smoke test on a generated English label, four-width confirmation/persistence flows, misleading-variant rejection, and isolated network-failure/cancellation tests. It does not establish accuracy on real bottle photos or physical-phone camera compatibility. Non-English OCR, unrestricted product search, cloud recognition and live prices remain future work. Older camera demo buttons remain explicitly labelled as examples.

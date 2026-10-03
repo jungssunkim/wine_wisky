@@ -4,20 +4,21 @@ import { categories } from "../data/categories";
 import { prepareBottlePhoto } from "../lib/bottlePhoto";
 import { BottleFigure } from "./BottleFigure";
 
-export function BottleEditor({ initial, onSave, onCancel }: {
-  initial?: Bottle; onSave: (bottle: Bottle) => boolean; onCancel: () => void;
+export function BottleEditor({ initial, seed, saveDisabled = false, onSave, onCancel }: {
+  initial?: Bottle; seed?: Bottle; saveDisabled?: boolean; onSave: (bottle: Bottle) => boolean; onCancel: () => void;
 }) {
-  const [name, setName] = useState(initial?.name ?? "");
-  const [brand, setBrand] = useState(initial?.brand ?? "");
-  const [category, setCategory] = useState<Bottle["category"]>(initial?.category ?? "whisky");
-  const [country, setCountry] = useState(initial?.country ?? "");
-  const [region, setRegion] = useState(initial?.region ?? "");
-  const [abv, setAbv] = useState(initial ? String(initial.abv) : "");
-  const [volume, setVolume] = useState(initial ? String(initial.volumeMl) : "700");
-  const [price, setPrice] = useState(initial && !initial.priceIsUnknown ? String(initial.price) : "");
-  const [note, setNote] = useState(initial?.note ?? "");
-  const [pairings, setPairings] = useState(initial?.pairings.join(", ") ?? "");
-  const [photo, setPhoto] = useState(initial?.bottleImageUrl);
+  const preset = initial ?? seed;
+  const [name, setName] = useState(preset?.name ?? "");
+  const [brand, setBrand] = useState(preset?.brand ?? "");
+  const [category, setCategory] = useState<Bottle["category"]>(preset?.category ?? "whisky");
+  const [country, setCountry] = useState(preset?.country ?? "");
+  const [region, setRegion] = useState(preset?.region ?? "");
+  const [abv, setAbv] = useState(initial ? String(initial.abv) : seed && seed.abv > 0 ? String(seed.abv) : "");
+  const [volume, setVolume] = useState(initial ? String(initial.volumeMl) : seed ? (seed.volumeMl > 0 ? String(seed.volumeMl) : "") : "700");
+  const [price, setPrice] = useState(preset && !preset.priceIsUnknown ? String(preset.price) : "");
+  const [note, setNote] = useState(preset?.note ?? "");
+  const [pairings, setPairings] = useState(preset?.pairings.join(", ") ?? "");
+  const [photo, setPhoto] = useState(preset?.bottleImageUrl);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const cameraRef = useRef<HTMLInputElement>(null);
@@ -26,14 +27,15 @@ export function BottleEditor({ initial, onSave, onCancel }: {
   useEffect(() => () => { request.current += 1; }, []);
   const appearance = categories.find(c => c.value === category)!;
   const draft: Bottle = {
-    ...initial, id: initial?.id ?? "preview", name: name.trim() || "새로운 한 병",
+    ...preset, id: initial?.id ?? "preview", name: name.trim() || "새로운 한 병",
     shortName: name.trim() || "새로운 한 병", brand: brand.trim(), category, country: country.trim(),
     region: region.trim() || undefined, abv: Number(abv), volumeMl: Number(volume), price: Number(price),
     priceIsUnknown: !price.trim(), note: note.trim(),
     pairings: [...new Set(pairings.split(",").map(p => p.trim()).filter(Boolean))],
-    shape: initial?.category === category ? initial.shape : appearance.shape,
-    tone: initial?.category === category ? initial.tone : appearance.tone,
-    status: initial?.status ?? "owned", bottleImageUrl: photo, entrySource: "manual"
+    shape: preset?.category === category ? preset.shape : appearance.shape,
+    tone: preset?.category === category ? preset.tone : appearance.tone,
+    status: initial?.status ?? "owned", bottleImageUrl: photo, entrySource: "manual",
+    sourceLinks: preset && name.trim() === preset.name && brand.trim() === preset.brand && category === preset.category ? preset.sourceLinks : undefined
   };
   async function selectPhoto(file?: File) {
     if (!file) return;
@@ -50,7 +52,7 @@ export function BottleEditor({ initial, onSave, onCancel }: {
   }
   return <form className="confirm-form bottle-editor" onSubmit={e => {
     e.preventDefault();
-    if (busy) return;
+    if (busy || saveDisabled) return;
     setError("");
     if (!name.trim()) { setError("제품명을 입력해 주세요."); return; }
     if (!abv.trim() || !Number.isFinite(draft.abv) || draft.abv < 0 || draft.abv > 100 ||
@@ -61,7 +63,7 @@ export function BottleEditor({ initial, onSave, onCancel }: {
     if (draft.pairings.length > 20 || draft.pairings.some(p => p.length > 60)) {
       setError("페어링 음식은 20개까지, 이름은 각각 60자 이내로 입력해 주세요."); return;
     }
-    if (!onSave({ ...draft, id: initial?.id ?? crypto.randomUUID(), shortName: initial?.name === draft.name ? initial.shortName : draft.name })) {
+    if (!onSave({ ...draft, id: initial?.id ?? crypto.randomUUID(), shortName: preset?.name === draft.name ? preset.shortName : draft.name })) {
       setError("저장하지 못했어요. 입력 내용은 유지됩니다. 사진을 빼거나 브라우저 저장 설정을 확인한 뒤 다시 시도해 주세요.");
     }
   }}>
@@ -73,7 +75,7 @@ export function BottleEditor({ initial, onSave, onCancel }: {
       <button type="button" className="secondary-button" disabled={busy} onClick={() => albumRef.current?.click()}>사진 선택</button>
       {photo && <button type="button" className="text-button" disabled={busy} onClick={() => { setPhoto(undefined); setError(""); }}>사진 제거</button>}
     </div>
-    <p className="intro-copy" role="status">{busy ? "사진 크기를 줄이고 있어요…" : "사진은 이 브라우저에만 저장돼요. 자동 인식은 아직 지원하지 않아요. JPG·PNG·WebP, 최대 10MB."}</p>
+    <p className="intro-copy" role="status">{busy ? "사진 크기를 줄이고 있어요…" : "사진은 이 브라우저에만 저장돼요. 라벨 읽기는 등록 메뉴의 사진으로 술 찾기를 이용해 주세요. JPG·PNG·WebP, 최대 10MB."}</p>
     {error && <p className="form-error" role="alert">{error}</p>}
     <label>제품명 *<input required maxLength={100} value={name} onChange={e => setName(e.target.value)} placeholder="예: 발베니 더블우드 12" /></label>
     <label>술 종류<select value={category} onChange={e => setCategory(e.target.value as Bottle["category"])}>{categories.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}</select></label>
@@ -87,7 +89,7 @@ export function BottleEditor({ initial, onSave, onCancel }: {
     <label>구매 가격 (원)<input type="number" min="0" max="1000000000" step="1" value={price} onChange={e => setPrice(e.target.value)} placeholder="모르면 비워 두세요" /></label>
     <label>술 설명<textarea rows={3} maxLength={2000} value={note} onChange={e => setNote(e.target.value)} placeholder="라벨에 적힌 특징이나 기억할 정보를 남겨보세요." /></label>
     <label>페어링 음식<textarea rows={2} maxLength={1200} value={pairings} onChange={e => setPairings(e.target.value)} placeholder="치즈, 스테이크처럼 쉼표로 구분해 주세요." /></label>
-    <button className="camera-button" type="submit" disabled={busy}>{initial ? "변경사항 저장" : "내 술장에 저장"}</button>
+    <button className="camera-button" type="submit" disabled={busy || saveDisabled}>{initial ? "변경사항 저장" : "내 술장에 저장"}</button>
     <button className="secondary-button" type="button" onClick={onCancel}>취소</button>
   </form>;
 }
