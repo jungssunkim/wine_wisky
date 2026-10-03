@@ -81,7 +81,7 @@ const assert = require('node:assert/strict');
  // Network failure and cancellation are deterministic, isolated tests; the smoke test above uses actual OCR.
  for(const scenario of ['failure','cancel']) {
   const page=await browser.newPage({viewport:{width:360,height:844}});
-  await page.route('**/tesseract.min.js',route=>scenario==='failure'?route.abort():new Promise(resolve=>setTimeout(()=>{route.abort().then(resolve).catch(resolve)},3000)));
+  await page.route('**/worker.min.js',route=>scenario==='failure'?route.abort():new Promise(resolve=>setTimeout(()=>{route.abort().then(resolve).catch(resolve)},3000)));
   await page.goto('http://127.0.0.1:5173');
   await page.getByRole('button',{name:'술 추가',exact:true}).click();
   await page.getByRole('button',{name:'사진으로 술 찾기 · 영문 라벨',exact:true}).click();

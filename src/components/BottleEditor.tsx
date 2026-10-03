@@ -1,3 +1,4 @@
+import { useConfirmLeave, useUnsavedChanges } from "../hooks/useUnsavedChanges";
 import { validMetadata } from "../lib/bottleMetadata";
 import { useEffect, useRef, useState } from "react";
 import type { Bottle } from "../types";
@@ -44,6 +45,9 @@ export function BottleEditor({ initial, seed, saveDisabled = false, onSave, onCa
     status: initial?.status ?? "owned", bottleImageUrl: photo, entrySource: "manual",
     sourceLinks: preset && name.trim() === preset.name && brand.trim() === preset.brand && category === preset.category ? preset.sourceLinks : undefined
   };
+  const originalDraft = useRef(JSON.stringify(draft));
+  useUnsavedChanges(JSON.stringify(draft) !== originalDraft.current || busy);
+  const leave = useConfirmLeave();
   async function selectPhoto(file?: File) {
     if (!file) return;
     const token = ++request.current;
@@ -71,7 +75,7 @@ export function BottleEditor({ initial, seed, saveDisabled = false, onSave, onCa
     if (draft.pairings.length > 20 || draft.pairings.some(p => p.length > 60)) {
       setError("페어링 음식은 20개까지, 이름은 각각 60자 이내로 입력해 주세요."); return;
     }
-    if (!onSave({ ...draft, id: initial?.id ?? crypto.randomUUID(), shortName: preset?.name === draft.name ? preset.shortName : draft.name })) {
+    if (!onSave({ ...draft, id: initial?.id ?? crypto.randomUUID(), shortName: preset?.name === draft.name && preset.shortName?.trim() ? preset.shortName : draft.name })) {
       setError("저장하지 못했어요. 입력 내용은 유지됩니다. 사진을 빼거나 브라우저 저장 설정을 확인한 뒤 다시 시도해 주세요.");
     }
   }}>
@@ -104,6 +108,6 @@ export function BottleEditor({ initial, seed, saveDisabled = false, onSave, onCa
     <label>술 설명<textarea rows={3} maxLength={2000} value={note} onChange={e => setNote(e.target.value)} placeholder="라벨에 적힌 특징이나 기억할 정보를 남겨보세요." /></label>
     <label>페어링 음식<textarea rows={2} maxLength={1200} value={pairings} onChange={e => setPairings(e.target.value)} placeholder="치즈, 스테이크처럼 쉼표로 구분해 주세요." /></label>
     <button className="camera-button" type="submit" disabled={busy || saveDisabled}>{initial ? "변경사항 저장" : "내 술장에 저장"}</button>
-    <button className="secondary-button" type="button" onClick={onCancel}>취소</button>
+    <button className="secondary-button" type="button" onClick={() => leave(onCancel)}>취소</button>
   </form>;
 }

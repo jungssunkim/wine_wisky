@@ -1,3 +1,4 @@
+import { UnsavedChangesProvider, useConfirmLeave } from "./hooks/useUnsavedChanges";
 import { DeleteBottle } from "./components/DeleteBottle";
 import { SortControl } from "./components/SortControl";
 import { matchesBottle, sortBottles, type SortOrder } from "./lib/collection";
@@ -33,10 +34,13 @@ export function Header({ title, eyebrow, onBack }: { title: string; eyebrow?: st
   );
 }
 
-function Cabinet({ onBottle, bottles, onBackup }: { onBottle: (bottle: Bottle) => void; bottles: Bottle[]; onBackup: () => void }) {
-  const [query, setQuery] = useState("");
-  const [order, setOrder] = useState<SortOrder>("default");
-  const [category, setCategory] = useState("all");
+type CabinetView = { query: string; order: SortOrder; category: string };
+type HistoryView = { query: string; order: SortOrder };
+function Cabinet({ onBottle, bottles, onBackup, view, onView }: { onBottle: (bottle: Bottle) => void; bottles: Bottle[]; onBackup: () => void; view: CabinetView; onView: (view: CabinetView) => void }) {
+  const { query, order, category } = view;
+  const setQuery = (query: string) => onView({ ...view, query });
+  const setOrder = (order: SortOrder) => onView({ ...view, order });
+  const setCategory = (category: string) => onView({ ...view, category });
   const owned = bottles.filter((b) => b.status === "owned");
   const filtered = sortBottles(owned.filter(b => (category === "all" || b.category === category) && matchesBottle(b, query)), order);
   const shelves = Array.from({length: Math.ceil(filtered.length / 3)}, (_, i) => filtered.slice(i * 3, i * 3 + 3));
@@ -84,9 +88,10 @@ function Cabinet({ onBottle, bottles, onBackup }: { onBottle: (bottle: Bottle) =
   );
 }
 
-function HistoryPage({ onBottle, bottles }: { onBottle: (bottle: Bottle) => void; bottles: Bottle[] }) {
-  const [query, setQuery] = useState("");
-  const [order, setOrder] = useState<SortOrder>("default");
+function HistoryPage({ onBottle, bottles, view, onView }: { onBottle: (bottle: Bottle) => void; bottles: Bottle[]; view: HistoryView; onView: (view: HistoryView) => void }) {
+  const { query, order } = view;
+  const setQuery = (query: string) => onView({ ...view, query });
+  const setOrder = (order: SortOrder) => onView({ ...view, order });
   const allFinished = bottles.filter(b => b.status === "finished");
   const finished = sortBottles(allFinished.filter(b => matchesBottle(b, query)), order);
   return (
@@ -115,11 +120,12 @@ function HistoryPage({ onBottle, bottles }: { onBottle: (bottle: Bottle) => void
 
 function DetailPage({ bottle, onBack, onUpdate, onDelete }: { bottle: Bottle; onBack: () => void; onUpdate: (bottle: Bottle) => boolean; onDelete: () => boolean }) {
   const [editing, setEditing] = useState(false);
-  if (editing) return <main className="page"><Header title="술 정보 수정" eyebrow="EDIT BOTTLE" onBack={() => setEditing(false)} /><BottleEditor initial={bottle} onCancel={() => setEditing(false)} onSave={updated => { const saved = onUpdate(updated); if (saved) setEditing(false); return saved; }} /></main>;
+  const leave = useConfirmLeave();
+  if (editing) return <main className="page"><Header title="술 정보 수정" eyebrow="EDIT BOTTLE" onBack={() => leave(() => setEditing(false))} /><BottleEditor initial={bottle} onCancel={() => setEditing(false)} onSave={updated => { const saved = onUpdate(updated); if (saved) setEditing(false); return saved; }} /></main>;
   return (
     <main className="page detail-page">
       <Header title="한 병의 이야기" eyebrow={bottle.category.toUpperCase()} onBack={onBack} />
-      <button className="text-button edit-bottle-button" onClick={() => setEditing(true)}>술 정보 수정</button>
+      <button className="text-button edit-bottle-button" onClick={() => leave(() => setEditing(true))}>술 정보 수정</button>
       <section className="detail-hero">
         <div className="detail-bottle-stage"><BottleFigure bottle={bottle} empty={bottle.status === "finished"} /></div>
         <div className="detail-headline">
@@ -177,6 +183,13 @@ function BottomNav({ active, onChange }: { active: Tab; onChange: (tab: Tab) => 
 }
 
 export default function App() {
+  return <UnsavedChangesProvider><CabinetApp /></UnsavedChangesProvider>;
+}
+function CabinetApp() {
+  const leave = useConfirmLeave();
+  const [cabinetView, setCabinetView] = useState<CabinetView>({ query: "", order: "default", category: "all" });
+  const [historyView, setHistoryView] = useState<HistoryView>({ query: "", order: "default" });
+  const [pairingView, setPairingView] = useState({ food: "삼겹살", submitted: "삼겹살" });
   const { bottles, storageError, storageBlocked, originalData, addBottle, updateBottle, deleteBottle, restoreBottles } = useCabinet();
   const [screen, setScreen] = useState<Screen>({ type: "tab", tab: "cabinet" });
   const activeTab = screen.type === "tab" ? screen.tab : screen.from;
@@ -187,15 +200,15 @@ export default function App() {
       <div className="ambient ambient-one" /><div className="ambient ambient-two" />
       {storageError && <p className="storage-alert" role="alert">{storageError}</p>}
       {screen.type === "detail" ? (
-        <DetailPage onDelete={() => { const saved = deleteBottle(screen.bottle.id); if (saved) setScreen({type: "tab", tab: screen.from}); return saved; }} bottle={bottles.find(b => b.id === screen.bottle.id) ?? screen.bottle} onUpdate={updateBottle} onBack={() => setScreen({ type: "tab", tab: screen.from })} />
+        <DetailPage onDelete={() => { const saved = deleteBottle(screen.bottle.id); if (saved) setScreen({type: "tab", tab: screen.from}); return saved; }} bottle={bottles.find(b => b.id === screen.bottle.id) ?? screen.bottle} onUpdate={updateBottle} onBack={() => leave(() => setScreen({ type: "tab", tab: screen.from }))} />
       ) : (
         <>
-          {screen.tab === "cabinet" && <Cabinet bottles={bottles} onBottle={openBottle} onBackup={() => setScreen({type: "tab", tab: "backup"})} />}
-          {screen.tab === "history" && <HistoryPage bottles={bottles} onBottle={openBottle} />}
+          {screen.tab === "cabinet" && <Cabinet view={cabinetView} onView={setCabinetView} bottles={bottles} onBottle={openBottle} onBackup={() => setScreen({type: "tab", tab: "backup"})} />}
+          {screen.tab === "history" && <HistoryPage view={historyView} onView={setHistoryView} bottles={bottles} onBottle={openBottle} />}
           {screen.tab === "add" && <AddPage onSave={bottle => { const saved = addBottle(bottle); if (saved) setScreen({type: "tab", tab: "cabinet"}); return saved; }} />}
-          {screen.tab === "pairing" && <PairingPage bottles={bottles} onBottle={openBottle} />}
+          {screen.tab === "pairing" && <PairingPage view={pairingView} onView={setPairingView} bottles={bottles} onBottle={openBottle} />}
           {screen.tab === "backup" && <BackupPage bottles={bottles} blocked={storageBlocked} originalData={originalData} onRestore={restoreBottles} onBack={() => setScreen({type: "tab", tab: "cabinet"})} />}
-          <BottomNav active={activeTab} onChange={(tab) => setScreen({ type: "tab", tab })} />
+          <BottomNav active={activeTab} onChange={(tab) => leave(() => setScreen({ type: "tab", tab }))} />
         </>
       )}
     </div>

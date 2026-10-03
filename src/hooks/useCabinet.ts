@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { bottles as initialBottles } from "../data/mockBottles";
-import { isBottle, mergeBottles, MAX_BACKUP_BOTTLES } from "../lib/cabinetData";
+import { isBottle, isImportable, mergeBottles, MAX_BACKUP_BOTTLES } from "../lib/cabinetData";
 import type { Bottle } from "../types";
 
 export const STORAGE_KEY = "wine-wisky:cabinet:v1";
@@ -15,7 +15,7 @@ function readCabinet(): Snapshot {
     const parsed = JSON.parse(raw);
     if (parsed?.version !== 1 || !Array.isArray(parsed.bottles) || !parsed.bottles.every(isBottle)
       || new Set(parsed.bottles.map((b: Bottle) => b.id)).size !== parsed.bottles.length) throw new Error("Invalid cabinet");
-    return { bottles: parsed.bottles, error: "", blocked: false, raw };
+    return { bottles: parsed.bottles.map((b: Bottle) => ({ ...b, shortName: b.shortName.trim() || b.name.trim() })), error: "", blocked: false, raw };
   } catch {
     return { bottles: initialBottles, error: "저장된 술장을 읽을 수 없어 예시 술장을 표시합니다. 일반 변경은 저장하지 않습니다. 백업·복원에서 원본을 보관하거나 정상 백업으로 복구할 수 있어요.", blocked: true, raw };
   }
@@ -33,6 +33,10 @@ export function useCabinet() {
       }
       if (next.length > MAX_BACKUP_BOTTLES) {
         setSnapshot(current => ({ ...current, error: "술장은 최대 1,000병까지 저장할 수 있어요." }));
+        return false;
+      }
+      if (!next.every(isImportable)) {
+        setSnapshot(current => ({ ...current, error: "술 정보가 올바르지 않아 저장하지 못했어요. 제품명·도수·용량을 확인해 주세요." }));
         return false;
       }
       const raw = JSON.stringify({ version: 1, bottles: next });

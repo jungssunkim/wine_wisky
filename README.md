@@ -98,3 +98,14 @@ This address is not proof of a successful deployment; check the deploy job's env
 The website code and bundled demo bottles are public. Personal bottle photos, notes and purchase information remain in that browser's localStorage and are not included in deployments. Browser/device/domain changes do not transfer the collection: export a backup on the old origin and import it on the new one.
 
 Final physical-phone review: open the successful deployment URL, register a photo, edit purchase information, save a tasting note, mark a bottle finished, search History, verify pairing, then export a backup. Use an expendable test bottle to review permanent deletion. Real photo OCR accuracy and the device camera picker still require physical-phone testing.
+
+## Review corrections
+Unmatched OCR/manual registration always stores a visible short name. Existing empty short names are repaired in memory when the collection is loaded, and backup exports normalize them. All writes validate the same bottle constraints used by backup imports.
+
+Unsaved manual/photo edits and tasting notes request confirmation before tab/back/cancel navigation. The browser unload prompt is also enabled while drafts are dirty (browser support and user-interaction requirements apply). Confirmed completion or restoration saves the currently entered rating and tasting note in the same write; failed writes retain the draft. This is not automatic draft persistence across process crashes.
+
+Search/filter/sort settings and pairing input/results survive in-app detail/tab roundtrips; reload starts a fresh view.
+
+OCR uses a small adapter around the pinned Tesseract.js 6.0.1 worker message protocol. The native Worker is owned before loading scripts, WASM or language data; cancellation, timeout, initialization failure and success terminate it. Upgrade the adapter and real-engine test together if the pinned library changes.
+
+Run test:review with the development server running for the reviewed regressions and worker-lifecycle failures, in addition to test:ocr for the real engine.

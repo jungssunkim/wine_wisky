@@ -33,7 +33,7 @@ export function isBottle(value: unknown): value is Bottle {
 export const MAX_BACKUP_BYTES = 10 * 1024 * 1024;
 export const MAX_BACKUP_BOTTLES = 1000;
 
-function isImportable(b: unknown): b is Bottle {
+export function isImportable(b: unknown): b is Bottle {
   if (!isBottle(b)) return false;
   return b.name.trim().length > 0 && b.shortName.trim().length > 0 &&
     b.id.length <= 200 && b.name.length <= 100 && b.shortName.length <= 100 &&
@@ -48,7 +48,7 @@ function isImportable(b: unknown): b is Bottle {
 // Copy only supported fields. Unknown fields from imported JSON never enter app state.
 function cleanBottle(b: Bottle): Bottle {
   return {
-    id: b.id, name: b.name, shortName: b.shortName, brand: b.brand,
+    id: b.id, name: b.name, shortName: b.shortName.trim() || b.name.trim(), brand: b.brand,
     category: b.category, country: b.country, region: b.region,
     abv: b.abv, volumeMl: b.volumeMl, price: b.price,
     status: b.status, note: b.note, pairings: [...b.pairings],

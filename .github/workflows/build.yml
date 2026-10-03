@@ -47,6 +47,7 @@ jobs:
           npm run test:ocr
           npm run test:pairing
           npm run test:management
+          npm run test:review
 
       - name: Check production build under repository path
         run: node qa/production-check.cjs

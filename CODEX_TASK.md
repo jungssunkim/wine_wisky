@@ -89,3 +89,10 @@ Polish and validate the first mobile UI prototype for Wine & Whisky Cabinet.
 - Preserve downloadable mobile screenshots in Actions.
 - Document one-time Pages activation, reruns, local-data transfer and final phone review.
 - Verify deployment status before presenting the expected address as a working link.
+
+## Review fixes
+- Keep unknown OCR bottle names nonempty; normalize legacy empty short names and validate writes using backup-compatible bottle rules.
+- Guard unsaved forms on tab/back/cancel and browser unload; save the current journal atomically when finishing/restoring a bottle.
+- Preserve Cabinet/History search, filter, sort and Pairing input/results during in-app navigation.
+- Own the native OCR worker before initialization; terminate at cancellation, timeout, success and any initialization failure.
+- Verify regressions at four widths, all worker lifecycle stages, and the real pinned OCR engine.

@@ -1,3 +1,4 @@
+import { useConfirmLeave, useUnsavedChanges } from "../hooks/useUnsavedChanges";
 import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, Camera, ImagePlus } from "lucide-react";
 import type { Bottle } from "../types";
@@ -20,6 +21,9 @@ export function ScanPage({onSave, onBack}: {onSave: (bottle: Bottle) => boolean;
   const album = useRef<HTMLInputElement>(null);
   const generation = useRef(0);
   const task = useRef<ReturnType<typeof readLabel>>();
+  const leave = useConfirmLeave();
+  // The scan draft is guarded by the parent while the editor handles its own changes.
+  useUnsavedChanges(!!photo || !!text || busy);
   useEffect(() => () => { generation.current++; task.current?.cancel(); }, []);
   function cancel() { generation.current++; task.current?.cancel(); task.current = undefined; setBusy(false); setMessage("인식을 취소했어요. 글자를 직접 입력할 수도 있어요."); }
   async function selectPhoto(file?: File) {
@@ -51,7 +55,7 @@ export function ScanPage({onSave, onBack}: {onSave: (bottle: Bottle) => boolean;
     setSeed(makeScanDraft(text, photo, product)); setConfirmed(!product); setError("");
   }
   if (seed) return <main className="page scan-page">
-    <header className="topbar"><div><span className="eyebrow">CONFIRM YOUR BOTTLE</span><h1>제품 확인</h1></div><button className="icon-button" aria-label="인식 결과로 돌아가기" onClick={() => setSeed(undefined)}><ChevronLeft /></button></header>
+    <header className="topbar"><div><span className="eyebrow">CONFIRM YOUR BOTTLE</span><h1>제품 확인</h1></div><button className="icon-button" aria-label="인식 결과로 돌아가기" onClick={() => leave(() => setSeed(undefined))}><ChevronLeft /></button></header>
     <p className="intro-copy">제품명·연산을 확인하고 실제 병에 적힌 도수와 용량을 검토해 주세요. 가격과 페어링은 추정해서 채우지 않습니다.</p>
     {seed.sourceLinks?.map(link => <a className="source-link" href={link.url} key={link.url} target="_blank" rel="noopener noreferrer">{link.title} 열기 ↗</a>)}
     {!!seed.sourceLinks?.length && <label className="restore-confirm"><input type="checkbox" checked={confirmed} onChange={e => setConfirmed(e.target.checked)} /><span>라벨과 비교했고 이 제품이 맞습니다</span></label>}
@@ -59,7 +63,7 @@ export function ScanPage({onSave, onBack}: {onSave: (bottle: Bottle) => boolean;
   </main>;
   const matches = matchProducts(query);
   return <main className="page scan-page">
-    <header className="topbar"><div><span className="eyebrow">READ THE LABEL</span><h1>사진으로 술 찾기</h1></div><button className="icon-button" aria-label="등록 메뉴로 돌아가기" onClick={onBack}><ChevronLeft /></button></header>
+    <header className="topbar"><div><span className="eyebrow">READ THE LABEL</span><h1>사진으로 술 찾기</h1></div><button className="icon-button" aria-label="등록 메뉴로 돌아가기" onClick={() => leave(onBack)}><ChevronLeft /></button></header>
     <p className="intro-copy">영문 라벨 읽기 · 사진은 기기 안에서 처리합니다. 첫 실행에는 인식 엔진 다운로드를 위한 인터넷 연결이 필요해요.</p>
     <input hidden ref={camera} type="file" aria-label="라벨 촬영 파일" accept="image/jpeg,image/png,image/webp" capture="environment" onChange={e => { void selectPhoto(e.target.files?.[0]); e.target.value = ""; }} />
     <input hidden ref={album} type="file" aria-label="라벨 사진 파일" accept="image/jpeg,image/png,image/webp" onChange={e => { void selectPhoto(e.target.files?.[0]); e.target.value = ""; }} />
